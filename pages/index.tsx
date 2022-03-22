@@ -2,7 +2,7 @@
 import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import NextImage from '../components/image';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, WheelEvent } from 'react';
 import Layout from '../components/layout';
 import { fetchAPI } from '../lib/api';
 import Card from '../components/card';
@@ -83,18 +83,20 @@ const Home = ({
         </div>
       </div>
 
-      {/* Cards */}
-      <div className="mx-4 flex gap-10 items-center overflow-scroll w-screen pb-4 md:pb-8 lg:w-[54vw] lg:mx-10">
+      <div
+        className="mx-4 flex gap-10 items-center overflow-x-hidden w-screen pb-4 md:pb-8 lg:w-[54vw] lg:mx-10"
+        onWheel={(e: WheelEvent<HTMLDivElement>) => {
+          e.currentTarget.scrollLeft += e.deltaY;
+        }}
+      >
         {articles?.map((x, i) => (
-          <SampleCard cardData={x} key={i} />
-          // <Card
-          //   cardData={x}
-          //   key={i}
-          //   className="w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] shrink-0 relative"
-          //   isBlured
-          // />
+          // <SampleCard cardData={x} key={i} />
+          <Card
+            cardData={x}
+            key={i}
+            className="w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] shrink-0 relative"
+          />
         ))}
-        <div className="z-10 absolute w-32 h-32 "></div>
       </div>
     </Layout>
   );

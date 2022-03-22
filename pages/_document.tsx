@@ -1,4 +1,4 @@
-import Document, { Html, Head, Main, NextScript } from "next/document"
+import Document, { Html, Head, Main, NextScript } from 'next/document';
 
 // TODO: Убрать uikit и все, что с ним связано.
 class MyDocument extends Document {
@@ -28,13 +28,13 @@ class MyDocument extends Document {
             src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.2.0/js/uikit.js"
           />
         </Head>
-        <body>
+        <body className="overflow-hidden">
           <Main />
           <NextScript />
         </body>
       </Html>
-    )
+    );
   }
 }
 
-export default MyDocument
+export default MyDocument;
