@@ -6,16 +6,18 @@ const Card = ({
   cardData,
   className,
   imageProps,
+  isBlured,
 }: {
   cardData?: any;
   className?: any;
   imageProps?: any;
+  isBlured?: boolean;
 }) => {
   return (
-    // <div className="opacity-20 hover:opacity-100 w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] shrink-0 relative">
     <div className={className}>
       <Link href={`/works/1`}>
         <a>
+          {isBlured && <div className={''}></div>}
           <NextImage image={cardData.attributes.image} {...imageProps} />
         </a>
       </Link>

@@ -52,3 +52,7 @@ img:hover {
 .layout-sp {
   height: calc(100% - 5rem);
 }
+
+.blur-parent:hover .blur-viewer {
+  opacity: 1;
+}

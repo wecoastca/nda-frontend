@@ -6,16 +6,11 @@ export type ImageProps = Partial<NextImageProps> & {
 };
 
 const Image = ({ image, ...otherProps }: ImageProps) => {
-  const { url, alternativeText, width, height } = image.data.attributes;
-
-  // const loader = () => {
-  //   return getStrapiMedia(image)
-  // }
+  const { alternativeText } = image.data.attributes;
 
   return (
     //@ts-ignore
     <NextImage
-      // loader={loader}
       layout="fill"
       objectFit="cover"
       src={getStrapiMedia(image)}
