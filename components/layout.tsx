@@ -85,15 +85,17 @@ const Layout = ({
   children,
   categories,
   sidebarProps,
+  layoutContainerProps,
 }: {
   children: any;
   categories: any;
   sidebarProps?: any;
+  layoutContainerProps?: React.ComponentPropsWithoutRef<'div'>;
 }) => {
   const router = useRouter();
   // layout-sp
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen" {...layoutContainerProps}>
       <Nav categories={CATEGORIES} />
 
       <div className="flex w-screen overflow-hidden flex-1">

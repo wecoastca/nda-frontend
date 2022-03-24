@@ -2,7 +2,7 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import Layout from '../../components/layout';
 import { fetchAPI } from '../../lib/api';
 import { useRouter } from 'next/router';
-import { ButtonHTMLAttributes, FC, useState } from 'react';
+import React, { ButtonHTMLAttributes, FC, useState } from 'react';
 import NextImage from '../../components/image';
 
 const FIELDS = {
@@ -48,7 +48,7 @@ const WorkModal: FC<WorkModalPropsType> = ({
   }
 
   return (
-    <div className="w-full h-full fixed z-10 bg-white top-0 flex flex-col lg:hidden">
+    <div className="w-full h-full fixed z-10 bg-white top-0 flex flex-col lg:hidden lg:-z-10">
       <div className="border-b border-yellow-500 h-12 px-4 md:px-5 md:h-16 flex">
         <NavButton onClick={onBackButtonClick && onBackButtonClick}>
           <path
@@ -71,14 +71,14 @@ const Work = ({ categories, articles }) => {
   const currentImage = currentWork?.attributes?.image;
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
-  const handleClickNextWork = (e) => {
+  const handleClickNextWork = () => {
     const nextIndex = Number(router?.query?.slug) + 1;
     articles?.find((y) => y?.id == nextIndex)
       ? router?.push(`${nextIndex}`)
       : router?.push(`1`);
   };
 
-  const handleClickPreviousWork = (e) => {
+  const handleClickPreviousWork = () => {
     const prevIndex = Number(router?.query?.slug) - 1;
     articles?.find((y) => y?.id == prevIndex)
       ? router?.push(`${prevIndex}`)
@@ -86,7 +86,6 @@ const Work = ({ categories, articles }) => {
   };
 
   const handleCardClick = () => {
-    console.log(1);
     setIsModalVisible(!isModalVisible);
   };
 
@@ -105,6 +104,17 @@ const Work = ({ categories, articles }) => {
             />
           </NavButton>
         ),
+      }}
+      layoutContainerProps={{
+        onKeyDown: (e) => {
+          if (e?.key === 'ArrowLeft') {
+            handleClickPreviousWork();
+          }
+          if (e?.key === 'ArrowRight') {
+            handleClickNextWork();
+          }
+        },
+        tabIndex: -1,
       }}
     >
       {/* Nav mobile */}
@@ -128,10 +138,10 @@ const Work = ({ categories, articles }) => {
         </p>
         <div className="grid grid-cols-2 gap-x-10 gap-y-12 md:gap-x-28 lg:gap-x-16 xl:gap-x-32">
           {Object.entries(FIELDS).map(([key, value]) => (
-            <>
+            <React.Fragment key={key}>
               <div className="text-base">{key}</div>
               <div className="text-xs md:text-lg">{value}</div>
-            </>
+            </React.Fragment>
           ))}
         </div>
         <p className="text-xs md:text-lg">
@@ -143,12 +153,12 @@ const Work = ({ categories, articles }) => {
       <div className="lg:h-full lg:w-[54vw] lg:flex lg:items-center lg:justify-center">
         <button
           onClick={handleCardClick}
-          className="w-[139px] h-[184px] absolute right-4 bottom-14 md:w-[233px] md:h-[309px] md:right-11 md:bottom-24 lg:relative lg:right-auto lg:bottom-auto lg:w-[75%] lg:h-[78%] lg:cursor-default"
+          className="w-[139px] h-[184px] absolute right-4 bottom-14 md:w-[233px] md:h-[309px] md:right-11 md:bottom-24 lg:relative lg:right-auto lg:bottom-auto lg:w-[75%] lg:h-[78%] lg:cursor-default lg:pointer-events-none"
         >
           <NextImage image={currentImage} id="workImage" />
         </button>
       </div>
-      <div className="absolute top-[44%] right-[-46px] border-4 rounded-full border-[rgb(249,183,139,0.6)]">
+      <div className="absolute top-[44%] right-[-46px] border-4 rounded-full border-[rgb(249,183,139,0.6)] hidden lg:block">
         <NavButton
           onClick={handleClickNextWork}
           className="m-10 relative right-5"
