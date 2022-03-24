@@ -84,7 +84,7 @@ const Home = ({
       </div>
 
       <div
-        className="mx-4 flex gap-10 items-center overflow-x-hidden w-screen pb-4 md:pb-8 lg:w-[54vw] lg:mx-10"
+        className="mx-4 flex gap-10 items-center overflow-hidden w-screen my-4 lg:w-[54vw] lg:mx-10"
         onWheel={(e: WheelEvent<HTMLDivElement>) => {
           e.currentTarget.scrollLeft += e.deltaY;
         }}
