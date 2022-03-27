@@ -15,7 +15,12 @@ const Layout = ({
   const router = useRouter();
   // layout-sp
   return (
-    <div className="flex flex-col h-screen" {...layoutContainerProps}>
+    // TODO: Вынеси в стили
+    <div
+      className="flex flex-col h-screen"
+      style={{ minHeight: '-webkit-fill-available' }}
+      {...layoutContainerProps}
+    >
       <Nav categories={categories} />
 
       <div className="flex w-screen overflow-hidden flex-1">
