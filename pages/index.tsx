@@ -24,15 +24,6 @@ const SampleCard = ({ cardData }) => {
         // className="absolute top-0 bottom-0 right-0 left-0 m-auto w-[533px] h-[533px] text-center overflow-hidden blur-md blur-scene"
         className="w-full h-auto relative blur-md"
         onMouseMove={(e) => {
-          console.log(
-            e.clientX,
-            e.currentTarget?.getBoundingClientRect(),
-            e.currentTarget?.offsetWidth,
-            e.clientY,
-            e.currentTarget?.clientWidth,
-            e.currentTarget?.clientHeight
-          );
-
           const rect = e.currentTarget?.getBoundingClientRect();
           const halfViewer = e.currentTarget?.offsetWidth / 2;
 
@@ -84,9 +75,12 @@ const Home = ({
       </div>
 
       <div
-        className="mx-4 flex gap-10 items-center overflow-hidden w-screen my-4 lg:w-[54vw] lg:mx-10"
+        className="mx-4 flex gap-10 items-center overflow-scroll lg:overflow-hidden w-screen my-4 lg:w-[54vw] lg:mx-10"
         onWheel={(e: WheelEvent<HTMLDivElement>) => {
-          e.currentTarget.scrollLeft += e.deltaY;
+          // TODO: Вынести в глобальные переменные
+          if (window.innerWidth >= 1024) {
+            e.currentTarget.scrollLeft += e.deltaY;
+          }
         }}
       >
         {articles?.map((x, i) => (
