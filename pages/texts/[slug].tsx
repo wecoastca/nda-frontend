@@ -156,21 +156,11 @@ export const getStaticProps: GetStaticProps = async () => {
 
 // TODO: Измени на то, что будет приходить с бека список работ.
 export const getStaticPaths: GetStaticPaths = async () => {
+  const { data } = await fetchAPI('/articles');
+  const paths = data.map((w) => ({ params: { slug: `${w?.id}` } }));
+
   return {
-    paths: [
-      {
-        params: {
-          slug: '1',
-        },
-      },
-      { params: { slug: '2' } },
-      { params: { slug: '3' } },
-      { params: { slug: '4' } },
-      { params: { slug: '5' } },
-      { params: { slug: '6' } },
-      { params: { slug: '7' } },
-      { params: { slug: '8' } },
-    ],
+    paths,
     fallback: false,
   };
 };
