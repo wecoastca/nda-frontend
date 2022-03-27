@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 
 const Nav = ({ categories }: { categories: any }) => {
   const router = useRouter();
-
   return (
     <div className="sticky flex justify-between flex-wrap w-full bg-white z-10 border-b border-yellow-500">
       <nav className="flex md:gap-2 order-2 w-full md:w-auto md:order-1">
