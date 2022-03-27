@@ -96,7 +96,7 @@ const Work = ({ categories, articles }) => {
         children: (
           <NavButton
             onClick={handleClickPreviousWork}
-            className="hidden mx-auto lg:block "
+            className="hidden mx-auto lg:block hover:opacity-60 "
           >
             <path
               d="M10.3409 21L12.0909 19.25L4.88636 12.0682H23.5455V9.56818H4.88636L12.0909 2.36364L10.3409 0.636364L0.159091 10.8182L10.3409 21Z"
@@ -119,13 +119,16 @@ const Work = ({ categories, articles }) => {
     >
       {/* Nav mobile */}
       <div className="flex justify-between w-screen sticky border-b border-yellow-500 h-12 px-4 md:px-5 md:h-16 lg:hidden">
-        <NavButton onClick={handleClickPreviousWork}>
+        <NavButton
+          onClick={handleClickPreviousWork}
+          className="hover:opacity-60"
+        >
           <path
             d="M10.3409 21L12.0909 19.25L4.88636 12.0682H23.5455V9.56818H4.88636L12.0909 2.36364L10.3409 0.636364L0.159091 10.8182L10.3409 21Z"
             fill="black"
           />
         </NavButton>
-        <NavButton onClick={handleClickNextWork}>
+        <NavButton onClick={handleClickNextWork} className="hover:opacity-60">
           <path
             d="M13.2045 21L23.3864 10.8182L13.2045 0.636364L11.4545 2.38636L18.6591 9.56818H0V12.0682H18.6591L11.4545 19.2727L13.2045 21Z"
             fill="black"
@@ -158,7 +161,7 @@ const Work = ({ categories, articles }) => {
           <NextImage image={currentImage} id="workImage" />
         </button>
       </div>
-      <div className="absolute top-[44%] right-[-46px] border-4 rounded-full border-[rgb(249,183,139,0.6)] hidden lg:block">
+      <div className="absolute top-[44%] right-[-46px] border-2 hover:border-4 rounded-full hover:opacity-60 border-[#F9B78B] hover:border-[rgb(249,183,139,0.6)] hidden lg:block">
         <NavButton
           onClick={handleClickNextWork}
           className="m-10 relative right-5"
