@@ -75,7 +75,7 @@ const Home = ({
       </div>
 
       <div
-        className="mx-4 flex gap-10 items-center overflow-scroll lg:overflow-hidden w-screen my-4 lg:w-[54vw] lg:mx-10"
+        className="mx-4 flex gap-10 items-center overflow-x-scroll overflow-y-hidden lg:overflow-hidden w-screen my-4 lg:w-[54vw] lg:mx-10"
         onWheel={(e: WheelEvent<HTMLDivElement>) => {
           // TODO: Вынести в глобальные переменные
           if (window.innerWidth >= 1024) {
