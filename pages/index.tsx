@@ -9,43 +9,37 @@ import Card from '../components/card';
 import { getStrapiMedia } from '../lib/media';
 import Image from 'next/image';
 
-const SampleCard = ({ cardData }) => {
-  const [coords, setCoords] = useState({ x: 0, y: 0, xs: 0, ys: 0 });
-  const { x, y, xs, ys } = coords;
-  // console.log(x, y);
+const SampleCard = ({ cardData, articles }) => {
+  const [coords, setCoords] = useState({ x: 0, y: 0 });
+  const { x, y } = coords;
 
   return (
-    // <div className="relative w-[533px] h-[533px] cursor-pointer overflow-hidden inline-table border border-teal-500 blur-parent shrink-0">
-
-    <div className="relative shrink-0 w-[533px] h-[533px]">
-      <img
-        src={getStrapiMedia(cardData.attributes.image)}
-        alt="scene"
-        // className="absolute top-0 bottom-0 right-0 left-0 m-auto w-[533px] h-[533px] text-center overflow-hidden blur-md blur-scene"
-        className="w-full h-auto relative blur-md"
-        onMouseMove={(e) => {
-          const rect = e.currentTarget?.getBoundingClientRect();
-          const halfViewer = e.currentTarget?.offsetWidth / 2;
-
-          setCoords(() => ({
-            x: e.clientX - rect.left - halfViewer,
-            y: e.clientY - rect.top - halfViewer,
-            xs: e.currentTarget?.clientWidth,
-            ys: e.currentTarget?.clientHeight,
-          }));
-        }}
-      />
-      <img
-        src={getStrapiMedia(cardData.attributes.image)}
-        alt="viewer"
-        // className="z-10 absolute w-24 h-24 rounded-full pointer-events-none opacity-0  transition-opacity blur-viewer bg-[length:533px_533px]"
-        className="absolute top-0 left-0 block pointer-events-none"
-        style={{
-          transform: `translate(${x}px,${y}px)`,
-          backgroundPosition: `${-x}px ${-y}px`,
-          backgroundSize: `20% 20%`,
-        }}
-      />
+    <div className="relative shrink-0 w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] wrap">
+      <Link href={`/works/1`}>
+        <a>
+          <NextImage
+            image={cardData.attributes.image}
+            alt="scene"
+            className="w-full h-auto absolute blur-md"
+            onMouseMove={(e) => {
+              const rect = e.currentTarget?.getBoundingClientRect();
+              setCoords(() => ({
+                x: e.clientX - rect.left - rect.width / 2 + 192,
+                y: e.clientY - rect.top - rect.height / 2 + 192,
+              }));
+            }}
+          />
+          <div
+            className="z-10 absolute w-48 h-48 rounded-full transition-opacity pointer-events-none opacity-0 viewer"
+            style={{
+              transform: `translate(${x}px,${y}px)`,
+              background: `url(${getStrapiMedia(
+                cardData?.attributes?.image
+              )}) ${-x}px ${-y}px no-repeat`,
+            }}
+          />
+        </a>
+      </Link>
     </div>
   );
 };
@@ -84,12 +78,12 @@ const Home = ({
         }}
       >
         {articles?.map((x, i) => (
-          // <SampleCard cardData={x} key={i} />
-          <Card
-            cardData={x}
-            key={i}
-            className="w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] shrink-0 relative"
-          />
+          <SampleCard cardData={x} articles={articles} key={i} />
+          // <Card
+          //   cardData={x}
+          //   key={i}
+          //   className="w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] shrink-0 relative"
+          // />
         ))}
       </div>
     </Layout>

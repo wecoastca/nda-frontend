@@ -63,3 +63,7 @@ img:hover {
 .blur-parent:hover .blur-viewer {
   opacity: 1;
 }
+
+.wrap:hover .viewer{
+  opacity: 1;
+}
