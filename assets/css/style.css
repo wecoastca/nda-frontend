@@ -7,9 +7,16 @@
   padding: 0;
 }
 
+html {
+  height: -webkit-fill-available;
+}
+
 body {
   font-family: "Inter", sans-serif;
   color: black;
+
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
 }
 a {
   text-decoration: none;
