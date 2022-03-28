@@ -34,7 +34,7 @@ const Layout = ({
       </div>
 
       {router?.asPath === '/' ? (
-        <div className="bottom-0 w-full h-20 border-t border-yellow-500 bg-white flex items-center">
+        <div className="bottom-0 w-full h-20 border-t border-yellow-500 bg-white flex items-center sticky">
           <p className="ml-4">
             Idea — <span className="text-yellow-500">wid0ki</span>,
             illustrations —{' '}
@@ -43,7 +43,7 @@ const Layout = ({
           </p>
         </div>
       ) : (
-        <div className="bottom-0 w-full h-10 border-t border-yellow-500 bg-white flex items-center overflow-scroll md:h-16 lg:h-14 2xl:h-20">
+        <div className="bottom-0 w-full h-10 border-t border-yellow-500 bg-white flex items-center overflow-scroll md:h-16 lg:h-14 2xl:h-20 sticky">
           <p className="mx-4 relative whitespace-nowrap">
             If you want add your work here especially not under NDA —
             <a href="mailto:test@test.com">
