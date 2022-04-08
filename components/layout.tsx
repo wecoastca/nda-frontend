@@ -3,17 +3,14 @@ import Nav from './nav';
 
 const Layout = ({
   children,
-  categories,
   sidebarProps,
   layoutContainerProps,
 }: {
   children: any;
-  categories: any;
   sidebarProps?: any;
   layoutContainerProps?: React.ComponentPropsWithoutRef<'div'>;
 }) => {
   const router = useRouter();
-  // layout-sp
   return (
     // TODO: Вынеси в стили
     <div
@@ -21,7 +18,7 @@ const Layout = ({
       style={{ minHeight: '-webkit-fill-available' }}
       {...layoutContainerProps}
     >
-      <Nav categories={categories} />
+      <Nav />
 
       <div className="flex w-screen overflow-hidden flex-1">
         <div

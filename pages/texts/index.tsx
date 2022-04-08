@@ -87,7 +87,7 @@ const Texts = ({ categories }) => {
   const [textCategory, setTextCategory] = useState<string>('all');
 
   return (
-    <Layout categories={categories}>
+    <Layout>
       {/* Inline navigation */}
       {/*   */}
       <div className="shrink-0 border-yellow-500 border-b lg:border-b-0 lg:border-r lg:w-[42vw] lg:py-28">

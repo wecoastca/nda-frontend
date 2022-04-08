@@ -2,16 +2,15 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import Layout from '../../components/layout';
 import { fetchAPI } from '../../lib/api';
 import { useRouter } from 'next/router';
-import React, { ButtonHTMLAttributes, FC, useState } from 'react';
+import React, {
+  ButtonHTMLAttributes,
+  FC,
+  useCallback,
+  useRef,
+  useState,
+} from 'react';
 import NextImage from '../../components/image';
-
-const FIELDS = {
-  period: '2018',
-  duration: '1 month',
-  customer: 'SBER',
-  'project position': 'UX-researher',
-  tools: 'Tobii Studio OBS',
-};
+import { SampleCard } from '../../components/card';
 
 const NavButton: FC<ButtonHTMLAttributes<any>> = ({
   onClick,
@@ -64,34 +63,78 @@ const WorkModal: FC<WorkModalPropsType> = ({
   );
 };
 
-const Work = ({ categories, articles }) => {
+const Work = ({ works }) => {
   const router = useRouter();
   // TODO: Как сделаешь нормальную структуру данных, сделай чтобы в одном обьекте Work хранилась вся информация о работа + картинка
-  const currentWork = articles?.find((x) => x?.id == router?.query?.slug);
+  const currentWork = works?.find(
+    (x) => x?.attributes?.slug == router?.query?.slug
+  );
   const currentImage = currentWork?.attributes?.image;
+  const {
+    createdAt,
+    description,
+    publishedAt,
+    updatedAt,
+    ...currentDescription
+  } = currentWork?.attributes?.workDescription?.data?.attributes;
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [blur, _setBlur] = useState(12);
+
+  const blurRef = useRef(blur);
+  const setBlur = (value) => {
+    blurRef.current = value;
+    _setBlur(value);
+  };
 
   const handleClickNextWork = () => {
     const nextIndex = Number(router?.query?.slug) + 1;
-    articles?.find((y) => y?.id == nextIndex)
+    works?.find((y) => y?.id == nextIndex)
       ? router?.push(`${nextIndex}`)
       : router?.push(`1`);
   };
 
   const handleClickPreviousWork = () => {
     const prevIndex = Number(router?.query?.slug) - 1;
-    articles?.find((y) => y?.id == prevIndex)
+    works?.find((y) => y?.id == prevIndex)
       ? router?.push(`${prevIndex}`)
-      : router?.push(`${articles?.length}`);
+      : router?.push(`${works?.length}`);
   };
 
-  const handleCardClick = () => {
-    setIsModalVisible(!isModalVisible);
+  const handleCardClick = (e) => {
+    // Временное решение, раздели на два компонента
+    if (window.innerWidth < 1024) {
+      setIsModalVisible(!isModalVisible);
+    }
   };
+
+  // const handleOnScroll = useCallback(
+  //   (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+  //     // Сколько процентов scrollTop от всей высоты блока
+  //     const scrollPercent =
+  //       e.currentTarget?.scrollTop /
+  //       (e.currentTarget?.scrollHeight - e.currentTarget?.clientHeight);
+
+  //     setBlur(Math.round(scrollPercent * blur));
+  //   },
+  //   [blur]
+  // );
+
+  // const throttled = throttle(handleOnScroll, 100);
+
+  const handleOnScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+      // Сколько процентов scrollTop от всей высоты блока
+      const scrollPercent =
+        e.currentTarget?.scrollTop /
+        (e.currentTarget?.scrollHeight - e.currentTarget?.clientHeight);
+
+      setBlur(Math.round(scrollPercent * blur));
+    },
+    [blur]
+  );
 
   return (
     <Layout
-      categories={categories}
       sidebarProps={{
         children: (
           <NavButton
@@ -132,30 +175,34 @@ const Work = ({ categories, articles }) => {
           />
         </NavButton>
       </div>
-      <div className="w-screen h-full px-4 pt-3 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-yellow-500 lg:w-[42vw] 2xl:px-8 2xl:pt-28">
+      <div
+        onScroll={handleOnScroll}
+        className="w-screen h-full px-4 pt-3 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-yellow-500 lg:w-[42vw] 2xl:px-8 2xl:pt-28"
+      >
         <p className="text-lg md:text-2xl lg:text-xl xl:text-2xl">
           Moderated usability testing with eye-tracker
         </p>
         <div className="grid grid-cols-2 gap-x-10 gap-y-12 md:gap-x-28 lg:gap-x-16 xl:gap-x-32">
-          {Object.entries(FIELDS).map(([key, value]) => (
+          {Object.entries(currentDescription).map(([key, value]) => (
             <React.Fragment key={key}>
               <div className="text-base">{key}</div>
               <div className="text-xs md:text-lg">{value}</div>
             </React.Fragment>
           ))}
         </div>
-        <p className="text-xs md:text-lg">
-          Lorem Ipsuidopd djdjjdj uddu udjduud3 Lorem Ipsuidopd djdjjdj uddu
-          udjduud3
-        </p>
+        <p className="text-xs md:text-lg">{description}</p>
       </div>
 
       <div className="lg:h-full lg:w-[54vw] lg:flex lg:items-center lg:justify-center">
         <button
           onClick={handleCardClick}
-          className="w-[139px] h-[184px] absolute right-4 bottom-14 md:w-[233px] md:h-[309px] md:right-11 md:bottom-24 lg:relative lg:right-auto lg:bottom-auto lg:w-[75%] lg:h-[78%] lg:cursor-default lg:pointer-events-none"
+          className="w-[139px] h-[184px] absolute right-4 bottom-14 md:w-[233px] md:h-[309px] md:right-11 md:bottom-24 lg:relative lg:right-auto lg:bottom-auto lg:w-[75%] lg:h-[78%] lg:cursor-default"
         >
-          <NextImage image={currentImage} id="workImage" />
+          <SampleCard
+            item={currentWork}
+            blurValue={blur}
+            className="relative shrink-0 h-full w-full wrap"
+          />
         </button>
       </div>
       <div className="absolute top-[44%] right-[-46px] border-2 hover:border-4 rounded-full hover:opacity-60 border-[#F9B78B] hover:border-[rgb(249,183,139,0.6)] hidden lg:block">
@@ -184,24 +231,25 @@ const Work = ({ categories, articles }) => {
 
 export const getStaticProps: GetStaticProps = async () => {
   // Run API calls in parallel
-  const [categoriesRes, articlesRes] = await Promise.all([
+  const [categoriesRes, worksRes] = await Promise.all([
     fetchAPI('/categories', { populate: '*' }),
     //TODO: Call request for the current work not for all works
-    fetchAPI('/articles', { populate: ['image'] }),
+    fetchAPI('/works', { populate: '*' }),
   ]);
-
   return {
     props: {
       categories: categoriesRes.data,
-      articles: articlesRes.data,
+      works: worksRes.data,
     },
   };
 };
 
-// TODO: Измени на то, что будет приходить с бека список работ.
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { data } = await fetchAPI('/articles');
-  const paths = data.map((w) => ({ params: { slug: `${w?.id}` } }));
+  const { data } = await fetchAPI('/works');
+
+  const paths = data.map((w) => ({
+    params: { slug: `${w?.attributes?.slug}` },
+  }));
 
   return {
     paths,

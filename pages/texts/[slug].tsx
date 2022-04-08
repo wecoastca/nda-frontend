@@ -96,9 +96,9 @@ const OBJ = {
   },
 };
 
-const Text = ({ categories }) => {
+const Text = () => {
   return (
-    <Layout categories={categories}>
+    <Layout>
       <div className="border-r border-yellow-500 h-full w-5/12 flex flex-col  justify-evenly px-8 shrink-0">
         <p className="text-5xl">Moderated usability testing with eye-tracker</p>
         <div className="grid grid-cols-2 gap-x-16 gap-y-10">
@@ -142,16 +142,7 @@ const Text = ({ categories }) => {
 };
 
 export const getStaticProps: GetStaticProps = async () => {
-  // Run API calls in parallel
-  const [categoriesRes] = await Promise.all([
-    fetchAPI('/categories', { populate: '*' }),
-  ]);
-
-  return {
-    props: {
-      categories: categoriesRes.data,
-    },
-  };
+  return null;
 };
 
 // TODO: Измени на то, что будет приходить с бека список работ.

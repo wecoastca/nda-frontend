@@ -14,94 +14,42 @@ type Work = {
   name: string;
   url: string;
 };
-const WORK_TYPES: WorkType[] = [
-  { typeName: 'all', color: 'red' },
-  { typeName: 'curation', color: 'red' },
-  { typeName: 'design', color: 'red' },
+
+const CATEGORIES_COLORS: WorkType[] = [
+  { typeName: 'curation', color: 'bg-lime-400' },
+  { typeName: 'design', color: 'bg-orange-400' },
   { typeName: 'research', color: 'bg-pink-400' },
 ];
-const WORKS: Work[] = [
-  {
-    type: { typeName: 'research', color: 'bg-[#FF6AC6]' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/works/1',
-  },
-  {
-    type: { typeName: 'research', color: 'bg-[#FF6AC6]' },
-    name: 'Moderated non-laboratory usability testing of the ATMs →',
-    url: '/works/2',
-  },
-  {
-    type: { typeName: 'research', color: 'bg-[#FF6AC6]' },
-    name: 'Moderated non-laboratory usability testing of the ATMs →',
-    url: '/works/3',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-[#02FA00]' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/works/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-[#02FA00]' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/works/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-[#02FA00]' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/works/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-[#02FA00]' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/works/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-[#02FA00]' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/works/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-[#02FA00]' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/works/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-[#02FA00]' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/works/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-[#02FA00]' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/works/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-[#02FA00]' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/works/1',
-  },
-];
 
-const Works = ({ categories }) => {
+const Works = ({ categories, works }) => {
   const [workCategory, setWorkCategory] = useState<string>('all');
 
   return (
-    <Layout categories={categories}>
+    <Layout>
       {/* Inline navigation */}
-      {/*   */}
       <div className="shrink-0 border-yellow-500 border-b lg:border-b-0 lg:border-r lg:w-[42vw] lg:py-28">
         <ul className="flex text-sm gap-9 w-screen overflow-scroll px-4 md:text-xl md:gap-16 lg:gap-5 lg:w-auto lg:flex-col xl:text-2xl xl:px-6">
-          {WORK_TYPES?.map((type) => (
-            <li key={type.typeName}>
+          <li>
+            <button
+              value={'all'}
+              onClick={(e) => setWorkCategory(e?.currentTarget?.value)}
+              className={`hover:opacity-20 visited:line-through ${
+                workCategory === 'all' ? 'line-through' : null
+              }`}
+            >
+              all
+            </button>
+          </li>
+          {categories?.map((item) => (
+            <li key={item.id}>
               <button
-                value={type.typeName}
+                value={item?.attributes.name}
                 onClick={(e) => setWorkCategory(e?.currentTarget?.value)}
                 className={`hover:opacity-20 visited:line-through ${
-                  workCategory === type.typeName ? 'line-through' : null
+                  workCategory === item.attributes?.name ? 'line-through' : null
                 }`}
               >
-                {type.typeName}
+                {item?.attributes?.name}
               </button>
             </li>
           ))}
@@ -109,34 +57,56 @@ const Works = ({ categories }) => {
       </div>
 
       {/* Table */}
-      <div className="grid overflow-scroll md:grid-cols-2 lg:grid-cols-none lg:grid-rows-2 lg:grid-flow-col lg:w-[54vw] lg:auto-cols-[100%] xl:auto-cols-[50%] 2xl:auto-cols-[33%]">
-        {WORKS.map((work, i) => (
-          <div
-            key={work?.name}
-            //   i % 2 === 0 ? 'border-b' : ''
-            className={`border-yellow-500 border-r px-8 py-12 flex flex-col gap-8 border-b`}
-          >
-            <div className="relative w-min">
+      <div className="grid overflow-x-scroll md:grid-cols-2 lg:grid-cols-none lg:grid-rows-2 lg:grid-flow-col lg:w-[54vw] lg:auto-cols-[100%] xl:auto-cols-[50%] 2xl:auto-cols-[33%]">
+        {works
+          .filter(
+            (x) =>
+              !!x?.attributes?.categories?.data?.find(
+                (z) => z?.attributes?.name === workCategory
+              ) || workCategory === 'all'
+          )
+          .map((work) => {
+            return (
               <div
-                className={`${work?.type?.color} blur-md h-8 w-full absolute -z-10`}
-              ></div>
-              <button
-                value={work?.type?.typeName}
-                onClick={(e) => setWorkCategory(e?.currentTarget?.value)}
-                className={`hover:opacity-20 visited:line-through inline-block ${
-                  workCategory === work?.type?.typeName ? 'line-through' : null
-                }`}
+                key={work?.id}
+                className={`border-yellow-500 border-r px-8 py-12 flex flex-col gap-8 border-b`}
               >
-                <span className="text-base z-10">{work?.type?.typeName}</span>
-              </button>
-            </div>
-            <Link href={work?.url}>
-              <a className="hover:opacity-20 text-lg">
-                <p>{work?.name}</p>
-              </a>
-            </Link>
-          </div>
-        ))}
+                <div className="relative w-min">
+                  <div
+                    className={`${
+                      CATEGORIES_COLORS.find(
+                        (x) =>
+                          x?.typeName ===
+                          work?.attributes?.categories?.data?.[0]?.attributes
+                            ?.name
+                      )?.color
+                    } blur-md h-8 w-full absolute -z-10`}
+                  ></div>
+                  <button
+                    value={
+                      work?.attributes?.categories?.data?.[0]?.attributes?.name
+                    }
+                    onClick={(e) => setWorkCategory(e?.currentTarget?.value)}
+                    className={`hover:opacity-20 visited:line-through inline-block`}
+                  >
+                    <span className="text-base z-10">
+                      {
+                        work?.attributes?.categories?.data?.[0]?.attributes
+                          ?.name
+                      }
+                    </span>
+                  </button>
+                </div>
+                <Link
+                  href={`/works/${encodeURIComponent(work?.attributes?.slug)}`}
+                >
+                  <a className="hover:opacity-20 text-lg">
+                    <p>{work?.attributes?.title}</p>
+                  </a>
+                </Link>
+              </div>
+            );
+          })}
       </div>
     </Layout>
   );
@@ -144,13 +114,15 @@ const Works = ({ categories }) => {
 
 export const getStaticProps: GetStaticProps = async () => {
   // Run API calls in parallel
-  const [categoriesRes] = await Promise.all([
+  const [{ data: categories }, { data: works }] = await Promise.all([
     fetchAPI('/categories', { populate: '*' }),
+    fetchAPI('/works', { populate: '*' }),
   ]);
 
   return {
     props: {
-      categories: categoriesRes.data,
+      categories,
+      works,
     },
   };
 };

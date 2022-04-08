@@ -1,8 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import useSWR from 'swr';
+import { fetchAPI } from '../lib/api';
 
-const Nav = ({ categories }: { categories: any }) => {
+const Nav = () => {
+  const { data } = useSWR(['/navigation-items'], fetchAPI);
+
   const router = useRouter();
 
   return (
@@ -14,21 +18,21 @@ const Nav = ({ categories }: { categories: any }) => {
           </a>
         </Link>
         <ul className="flex md:gap-8 items-center w-full md:w-auto justify-between md:justify-start px-4 md:px-0">
-          {categories
-            ?.sort((a, b) => a?.id - b?.id)
-            .map((category) => {
+          {data?.data
+            ?.sort((a, b) => a?.attributes?.order - b?.attributes?.order)
+            .map((item) => {
               return (
-                <li key={category?.id}>
-                  <Link href={`/${category.attributes.slug}`}>
+                <li key={item?.id}>
+                  <Link href={`/${item.attributes.slug}`}>
                     <a
                       className={`text-sm md:text-xl italic capitalize hover:opacity-20 ${
                         router?.asPath.replace(/^\/|\/\d+$/g, '') ===
-                        category.attributes.slug
+                        item.attributes.slug
                           ? 'line-through'
                           : null
                       }`}
                     >
-                      {category.attributes.name}
+                      {item.attributes.name}
                     </a>
                   </Link>
                 </li>

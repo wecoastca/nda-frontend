@@ -1,62 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 import { GetStaticProps } from 'next';
-import Link from 'next/link';
-import NextImage from '../components/image';
-import React, { useEffect, useState, WheelEvent } from 'react';
+import React, { WheelEvent } from 'react';
 import Layout from '../components/layout';
 import { fetchAPI } from '../lib/api';
-import Card from '../components/card';
-import { getStrapiMedia } from '../lib/media';
-import Image from 'next/image';
+import { SampleCard } from '../components/card';
 
-const SampleCard = ({ cardData, articles }) => {
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
-  const { x, y } = coords;
-
-  return (
-    <div className="relative shrink-0 w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] wrap">
-      <Link href={`/works/1`}>
-        <a>
-          <NextImage
-            image={cardData.attributes.image}
-            alt="scene"
-            className="w-full h-auto absolute blur-md"
-            onMouseMove={(e) => {
-              const rect = e.currentTarget?.getBoundingClientRect();
-              setCoords(() => ({
-                x: e.clientX - rect.left - rect.width / 2 + 192,
-                y: e.clientY - rect.top - rect.height / 2 + 192,
-              }));
-            }}
-          />
-          <div
-            className="z-10 absolute w-48 h-48 rounded-full transition-opacity pointer-events-none opacity-0 viewer"
-            style={{
-              transform: `translate(${x}px,${y}px)`,
-              background: `url(${getStrapiMedia(
-                cardData?.attributes?.image
-              )}) ${-x}px ${-y}px no-repeat`,
-            }}
-          />
-        </a>
-      </Link>
-    </div>
-  );
-};
-
-const Home = ({
-  categories,
-  homepage,
-  articles,
-}: {
-  articles: any;
-  categories: any;
-  homepage: any;
-}) => {
+const Home = ({ homepage, works }: { works: any; homepage: any }) => {
   // TODO: Левый и правый блок вынести в отдельные компоненты
-
   return (
-    <Layout categories={categories}>
+    <Layout>
       {/* Text block */}
       <div className="flex flex-col px-4 justify-around w-screen gap-5 pt-4 md:pt-8 md:gap-10 lg:gap-0 lg:px-5 lg:border-r lg:border-yellow-500 lg:w-[42vw]">
         <p className="text-base md:text-xl xl:text-2xl">
@@ -77,8 +29,13 @@ const Home = ({
           }
         }}
       >
-        {articles?.map((x, i) => (
-          <SampleCard cardData={x} articles={articles} key={i} />
+        {works?.map((x, i) => (
+          <SampleCard
+            item={x}
+            blurValue={12}
+            key={i}
+            className="relative shrink-0 w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] wrap"
+          />
           // <Card
           //   cardData={x}
           //   key={i}
@@ -92,9 +49,8 @@ const Home = ({
 
 export const getStaticProps: GetStaticProps = async () => {
   // Run API calls in parallel
-  const [articlesRes, categoriesRes, homepageRes] = await Promise.all([
-    fetchAPI('/articles', { populate: '*' }),
-    fetchAPI('/categories', { populate: '*' }),
+  const [worksRes, homepageRes] = await Promise.all([
+    fetchAPI('/works', { populate: '*' }),
     fetchAPI('/homepage', {
       populate: {
         hero: '*',
@@ -105,8 +61,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
   return {
     props: {
-      articles: articlesRes.data,
-      categories: categoriesRes.data,
+      works: worksRes.data,
       homepage: homepageRes.data,
     },
     revalidate: 1,
