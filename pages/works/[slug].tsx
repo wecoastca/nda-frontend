@@ -2,15 +2,10 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import Layout from '../../components/layout';
 import { fetchAPI } from '../../lib/api';
 import { useRouter } from 'next/router';
-import React, {
-  ButtonHTMLAttributes,
-  FC,
-  useCallback,
-  useRef,
-  useState,
-} from 'react';
+import React, { ButtonHTMLAttributes, FC, useCallback, useState } from 'react';
 import NextImage from '../../components/image';
 import { SampleCard } from '../../components/card';
+import { debounce } from 'lodash';
 
 const NavButton: FC<ButtonHTMLAttributes<any>> = ({
   onClick,
@@ -65,7 +60,6 @@ const WorkModal: FC<WorkModalPropsType> = ({
 
 const Work = ({ works }) => {
   const router = useRouter();
-  // TODO: Как сделаешь нормальную структуру данных, сделай чтобы в одном обьекте Work хранилась вся информация о работа + картинка
   const currentWork = works?.find(
     (x) => x?.attributes?.slug == router?.query?.slug
   );
@@ -78,13 +72,7 @@ const Work = ({ works }) => {
     ...currentDescription
   } = currentWork?.attributes?.workDescription?.data?.attributes;
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [blur, _setBlur] = useState(12);
-
-  const blurRef = useRef(blur);
-  const setBlur = (value) => {
-    blurRef.current = value;
-    _setBlur(value);
-  };
+  const [blur, setBlur] = useState({ default: 10, current: 10 });
 
   const handleClickNextWork = () => {
     const nextIndex = Number(router?.query?.slug) + 1;
@@ -107,31 +95,30 @@ const Work = ({ works }) => {
     }
   };
 
-  // const handleOnScroll = useCallback(
-  //   (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
-  //     // Сколько процентов scrollTop от всей высоты блока
-  //     const scrollPercent =
-  //       e.currentTarget?.scrollTop /
-  //       (e.currentTarget?.scrollHeight - e.currentTarget?.clientHeight);
+  const debouncedBlurSet = debounce((scrollTop, scrollHeight, clientHeight) => {
+    const scrollPercent = Number(
+      (scrollTop / (scrollHeight - clientHeight)).toPrecision(1)
+    );
 
-  //     setBlur(Math.round(scrollPercent * blur));
-  //   },
-  //   [blur]
-  // );
+    setBlur((blur) => ({
+      ...blur,
+      current: blur?.default - scrollPercent * blur?.default,
+    }));
+  }, 300);
 
-  // const throttled = throttle(handleOnScroll, 100);
+  const handleOnScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    debouncedBlurSet(
+      e.currentTarget?.scrollTop,
+      e.currentTarget?.scrollHeight,
+      e.currentTarget?.clientHeight
+    );
+  };
 
-  const handleOnScroll = useCallback(
-    (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
-      // Сколько процентов scrollTop от всей высоты блока
-      const scrollPercent =
-        e.currentTarget?.scrollTop /
-        (e.currentTarget?.scrollHeight - e.currentTarget?.clientHeight);
-
-      setBlur(Math.round(scrollPercent * blur));
-    },
-    [blur]
-  );
+  const scrollableRef = useCallback((node: HTMLDivElement) => {
+    if (node !== null && node?.clientHeight === node?.scrollHeight) {
+      setBlur((blur) => ({ ...blur, current: 0 }));
+    }
+  }, []);
 
   return (
     <Layout
@@ -162,13 +149,16 @@ const Work = ({ works }) => {
     >
       {/* Nav mobile */}
       <div className="flex justify-between w-screen sticky border-b border-yellow-500 h-12 px-4 md:px-5 md:h-16 lg:hidden">
-        <NavButton onClick={handleClickPreviousWork}>
+        <NavButton
+          onClick={handleClickPreviousWork}
+          className="active:opacity-60"
+        >
           <path
             d="M10.3409 21L12.0909 19.25L4.88636 12.0682H23.5455V9.56818H4.88636L12.0909 2.36364L10.3409 0.636364L0.159091 10.8182L10.3409 21Z"
             fill="black"
           />
         </NavButton>
-        <NavButton onClick={handleClickNextWork}>
+        <NavButton onClick={handleClickNextWork} className="active:opacity-60">
           <path
             d="M13.2045 21L23.3864 10.8182L13.2045 0.636364L11.4545 2.38636L18.6591 9.56818H0V12.0682H18.6591L11.4545 19.2727L13.2045 21Z"
             fill="black"
@@ -177,6 +167,7 @@ const Work = ({ works }) => {
       </div>
       <div
         onScroll={handleOnScroll}
+        ref={scrollableRef}
         className="w-screen h-full px-4 pt-3 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-yellow-500 lg:w-[42vw] 2xl:px-8 2xl:pt-28"
       >
         <p className="text-lg md:text-2xl lg:text-xl xl:text-2xl">
@@ -200,7 +191,7 @@ const Work = ({ works }) => {
         >
           <SampleCard
             item={currentWork}
-            blurValue={blur}
+            blurValue={blur?.current}
             className="relative shrink-0 h-full w-full wrap"
           />
         </button>

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Nav from './nav';
 
@@ -25,7 +26,7 @@ const Layout = ({
           className="hidden w-16 xl:w-20 border-r border-yellow-500 lg:flex shrink-0"
           {...sidebarProps}
         ></div>
-        <div className="flex flex-col justify-evenly lg:my-0 lg:flex-row lg:justify-start">
+        <div className="flex flex-col lg:my-0 lg:flex-row lg:justify-start">
           {children}
         </div>
       </div>
@@ -33,10 +34,24 @@ const Layout = ({
       {router?.asPath === '/' ? (
         <div className="bottom-0 w-full h-20 border-t border-yellow-500 bg-white flex items-center sticky">
           <p className="ml-4">
-            Idea — <span className="text-yellow-500">wid0ki</span>,
-            illustrations —{' '}
-            <span className="text-yellow-500">Margarita Shatalova</span>, code —{' '}
-            <span className="text-yellow-500">Anton Shishov</span>
+            Idea —{' '}
+            <Link href="/">
+              <a>
+                <span className="text-yellow-500">wid0ki</span>
+              </a>
+            </Link>
+            , illustrations —{' '}
+            <Link href="/">
+              <a>
+                <span className="text-yellow-500">Margarita Shatalova</span>
+              </a>
+            </Link>
+            , code —{' '}
+            <Link href="/">
+              <a>
+                <span className="text-yellow-500">Anton Shishov</span>
+              </a>
+            </Link>
           </p>
         </div>
       ) : (

@@ -2,7 +2,7 @@ import { GetStaticProps } from 'next';
 import Layout from '../../components/layout';
 import { fetchAPI } from '../../lib/api';
 import Link from 'next/link';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 type WorkType = {
   typeName: 'all' | 'curation' | 'design' | 'research';
@@ -71,31 +71,29 @@ const Works = ({ categories, works }) => {
                 key={work?.id}
                 className={`border-yellow-500 border-r px-8 py-12 flex flex-col gap-8 border-b`}
               >
-                <div className="relative w-min">
-                  <div
-                    className={`${
-                      CATEGORIES_COLORS.find(
-                        (x) =>
-                          x?.typeName ===
-                          work?.attributes?.categories?.data?.[0]?.attributes
-                            ?.name
-                      )?.color
-                    } blur-md h-8 w-full absolute -z-10`}
-                  ></div>
-                  <button
-                    value={
-                      work?.attributes?.categories?.data?.[0]?.attributes?.name
-                    }
-                    onClick={(e) => setWorkCategory(e?.currentTarget?.value)}
-                    className={`hover:opacity-20 visited:line-through inline-block`}
-                  >
-                    <span className="text-base z-10">
-                      {
-                        work?.attributes?.categories?.data?.[0]?.attributes
-                          ?.name
-                      }
-                    </span>
-                  </button>
+                <div className="relative w-min flex gap-5">
+                  {work?.attributes?.categories?.data?.map((c) => (
+                    <div key={c?.id}>
+                      <div
+                        className={`${
+                          CATEGORIES_COLORS.find(
+                            (x) => x?.typeName === c?.attributes?.name
+                          )?.color
+                        } blur-md h-8 w-24 absolute -z-10`}
+                      ></div>
+                      <button
+                        value={c?.attributes?.name}
+                        onClick={(e) =>
+                          setWorkCategory(e?.currentTarget?.value)
+                        }
+                        className={`hover:opacity-20 visited:line-through inline-block`}
+                      >
+                        <span className="text-base z-10">
+                          {c?.attributes?.name}
+                        </span>
+                      </button>
+                    </div>
+                  ))}
                 </div>
                 <Link
                   href={`/works/${encodeURIComponent(work?.attributes?.slug)}`}
