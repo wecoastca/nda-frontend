@@ -57,11 +57,11 @@ const Layout = ({
       ) : (
         <div className="bottom-0 w-full h-10 border-t border-yellow-500 bg-white flex items-center overflow-scroll md:h-16 lg:h-14 2xl:h-20 sticky">
           <p className="mx-4 relative whitespace-nowrap">
-            If you want add your work here especially not under NDA —
             <a href="mailto:test@test.com">
               <div className="inline-block blur-lg h-4 w-20 absolute bg-orange-500"></div>
               <span className="z-10">drop a line</span>
             </a>
+            — If you want add your work here especially not under NDA
           </p>
         </div>
       )}

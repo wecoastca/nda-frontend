@@ -2,7 +2,13 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import Layout from '../../components/layout';
 import { fetchAPI } from '../../lib/api';
 import { useRouter } from 'next/router';
-import React, { ButtonHTMLAttributes, FC, useCallback, useState } from 'react';
+import React, {
+  ButtonHTMLAttributes,
+  FC,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import NextImage from '../../components/image';
 import { SampleCard } from '../../components/card';
 import { debounce } from 'lodash';
@@ -63,7 +69,7 @@ const Work = ({ works }) => {
   const currentWork = works?.find(
     (x) => x?.attributes?.slug == router?.query?.slug
   );
-  const currentImage = currentWork?.attributes?.image;
+  const currentImage = currentWork?.attributes?.originalImage;
   const {
     createdAt,
     description,
@@ -73,6 +79,11 @@ const Work = ({ works }) => {
   } = currentWork?.attributes?.workDescription?.data?.attributes;
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [blur, setBlur] = useState({ default: 10, current: 10 });
+  const [width, setWidth] = useState<number>();
+
+  useEffect(() => {
+    setWidth(window?.innerWidth);
+  }, [window?.innerWidth]);
 
   const handleClickNextWork = () => {
     const nextIndex = Number(router?.query?.slug) + 1;
@@ -171,7 +182,7 @@ const Work = ({ works }) => {
         className="w-screen h-full px-4 pt-3 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-yellow-500 lg:w-[42vw] 2xl:px-8 2xl:pt-28"
       >
         <p className="text-lg md:text-2xl lg:text-xl xl:text-2xl">
-          Moderated usability testing with eye-tracker
+          {currentWork?.attributes?.title}
         </p>
         <div className="grid grid-cols-2 gap-x-10 gap-y-12 md:gap-x-28 lg:gap-x-16 xl:gap-x-32">
           {Object.entries(currentDescription).map(([key, value]) => (
@@ -193,6 +204,7 @@ const Work = ({ works }) => {
             item={currentWork}
             blurValue={blur?.current}
             className="relative shrink-0 h-full w-full wrap"
+            isCompact={width < 1024}
           />
         </button>
       </div>
