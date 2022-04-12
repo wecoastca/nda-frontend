@@ -79,11 +79,7 @@ const Work = ({ works }) => {
   } = currentWork?.attributes?.workDescription?.data?.attributes;
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [blur, setBlur] = useState({ default: 10, current: 10 });
-  const [width, setWidth] = useState<number>();
-
-  useEffect(() => {
-    setWidth(window?.innerWidth);
-  }, [window?.innerWidth]);
+  const [isCompact, setIsCompact] = useState(false);
 
   const handleClickNextWork = () => {
     const nextIndex = Number(router?.query?.slug) + 1;
@@ -126,6 +122,8 @@ const Work = ({ works }) => {
   };
 
   const scrollableRef = useCallback((node: HTMLDivElement) => {
+    // TODO: поменять на что-то более адекватное
+    setIsCompact(node?.parentElement?.parentElement?.clientWidth < 1024);
     if (node !== null && node?.clientHeight === node?.scrollHeight) {
       setBlur((blur) => ({ ...blur, current: 0 }));
     }
@@ -204,7 +202,7 @@ const Work = ({ works }) => {
             item={currentWork}
             blurValue={blur?.current}
             className="relative shrink-0 h-full w-full wrap"
-            isCompact={width < 1024}
+            isCompact={isCompact}
           />
         </button>
       </div>

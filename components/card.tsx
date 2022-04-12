@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import NextImage from './image';
 import { getStrapiMedia } from '../lib/media';
@@ -17,6 +17,19 @@ export const SampleCard = ({
   isCompact = false,
 }: SampleCardPropsType) => {
   const [coords, setCoords] = useState({ x: 0, y: 0 });
+  const [backgroundImageSize, setBackgroundImageSize] = useState({
+    width: 0,
+    height: 0,
+  });
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setBackgroundImageSize({
+      width: imageContainerRef?.current?.clientWidth,
+      height: imageContainerRef?.current?.clientHeight,
+    });
+  }, [imageContainerRef]);
+
   const image = item.attributes?.originalImage;
   const { x, y } = coords;
 
@@ -35,13 +48,14 @@ export const SampleCard = ({
   };
 
   return (
-    <div className={className}>
+    <div className={className + ' overflow-hidden'}>
       <Link href={`/works/${encodeURIComponent(item?.attributes?.slug)}`}>
         <a>
           <div
             className="absolute h-full w-full"
             style={{ filter: `blur(${blurValue}px)` }}
             onMouseMove={handleOnMouseMove}
+            ref={imageContainerRef}
           >
             <NextImage image={image} alt="scene" />
           </div>
@@ -50,9 +64,9 @@ export const SampleCard = ({
               className="z-10 absolute w-48 h-48 rounded-full transition-opacity pointer-events-none opacity-0 viewer"
               style={{
                 transform: `translate(${x}px,${y}px)`,
-                background: `url(${getStrapiMedia(
-                  image
-                )}) ${-x}px ${-y}px no-repeat`,
+                backgroundImage: `url(${getStrapiMedia(image)})`,
+                backgroundPosition: `${-x}px ${-y}px`,
+                backgroundSize: `${backgroundImageSize?.width}px ${backgroundImageSize?.height}px`,
               }}
             />
           )}
