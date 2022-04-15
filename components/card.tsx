@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import NextImage from './image';
 import { getStrapiMedia } from '../lib/media';
 
@@ -30,7 +29,8 @@ export const SampleCard = ({
     });
   }, [imageContainerRef]);
 
-  const image = item.attributes?.originalImage;
+  const { originalImage, fakeImage, isNDA } = item.attributes;
+  const fakeImageSrc = fakeImage?.data && getStrapiMedia(fakeImage);
   const { x, y } = coords;
 
   const handleOnMouseMove = (
@@ -49,29 +49,36 @@ export const SampleCard = ({
 
   return (
     <div className={className + ' overflow-hidden'}>
-      <Link href={`/works/${encodeURIComponent(item?.attributes?.slug)}`}>
-        <a>
-          <div
-            className="absolute h-full w-full"
-            style={{ filter: `blur(${blurValue}px)` }}
-            onMouseMove={handleOnMouseMove}
-            ref={imageContainerRef}
-          >
-            <NextImage image={image} alt="scene" />
-          </div>
-          {!isCompact && (
-            <div
-              className="z-10 absolute w-48 h-48 rounded-full transition-opacity pointer-events-none opacity-0 viewer"
-              style={{
-                transform: `translate(${x}px,${y}px)`,
-                backgroundImage: `url(${getStrapiMedia(image)})`,
-                backgroundPosition: `${-x}px ${-y}px`,
-                backgroundSize: `${backgroundImageSize?.width}px ${backgroundImageSize?.height}px`,
-              }}
-            />
-          )}
-        </a>
-      </Link>
+      <div
+        className="absolute h-full w-full"
+        style={{ filter: `blur(${blurValue}px)` }}
+        onMouseMove={handleOnMouseMove}
+        onContextMenu={(e) => {
+          e?.preventDefault();
+        }}
+        ref={imageContainerRef}
+      >
+        <NextImage image={originalImage} alt="scene" />
+        {fakeImageSrc && isNDA && (
+          <img
+            src={fakeImageSrc}
+            alt="fakeImage"
+            className="h-full w-full absolute"
+            style={{ opacity: blurValue / 10 }}
+          />
+        )}
+      </div>
+      {!isCompact && (
+        <div
+          className="z-10 absolute w-48 h-48 rounded-full transition-opacity pointer-events-none opacity-0 viewer"
+          style={{
+            transform: `translate(${x}px,${y}px)`,
+            backgroundImage: `url(${getStrapiMedia(originalImage)})`,
+            backgroundPosition: `${-x}px ${-y}px`,
+            backgroundSize: `${backgroundImageSize?.width}px ${backgroundImageSize?.height}px`,
+          }}
+        />
+      )}
     </div>
   );
 };

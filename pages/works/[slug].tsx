@@ -2,14 +2,7 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import Layout from '../../components/layout';
 import { fetchAPI } from '../../lib/api';
 import { useRouter } from 'next/router';
-import React, {
-  ButtonHTMLAttributes,
-  FC,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
-import NextImage from '../../components/image';
+import React, { ButtonHTMLAttributes, FC, useCallback, useState } from 'react';
 import { SampleCard } from '../../components/card';
 import { debounce } from 'lodash';
 
@@ -69,7 +62,6 @@ const Work = ({ works }) => {
   const currentWork = works?.find(
     (x) => x?.attributes?.slug == router?.query?.slug
   );
-  const currentImage = currentWork?.attributes?.originalImage;
   const {
     createdAt,
     description,
@@ -86,6 +78,7 @@ const Work = ({ works }) => {
     works?.find((y) => y?.id == nextIndex)
       ? router?.push(`${nextIndex}`)
       : router?.push(`1`);
+    setBlur((blur) => ({ ...blur, current: 10 }));
   };
 
   const handleClickPreviousWork = () => {
@@ -93,6 +86,7 @@ const Work = ({ works }) => {
     works?.find((y) => y?.id == prevIndex)
       ? router?.push(`${prevIndex}`)
       : router?.push(`${works?.length}`);
+    setBlur((blur) => ({ ...blur, current: 10 }));
   };
 
   const handleCardClick = (e) => {
@@ -121,13 +115,16 @@ const Work = ({ works }) => {
     );
   };
 
-  const scrollableRef = useCallback((node: HTMLDivElement) => {
-    // TODO: поменять на что-то более адекватное
-    setIsCompact(node?.parentElement?.parentElement?.clientWidth < 1024);
-    if (node !== null && node?.clientHeight === node?.scrollHeight) {
-      setBlur((blur) => ({ ...blur, current: 0 }));
-    }
-  }, []);
+  const scrollableRef = useCallback(
+    (node: HTMLDivElement) => {
+      // TODO: поменять на что-то более адекватное
+      setIsCompact(node?.parentElement?.parentElement?.clientWidth < 1024);
+      if (node !== null && node?.clientHeight === node?.scrollHeight) {
+        setBlur((blur) => ({ ...blur, current: 0 }));
+      }
+    },
+    [router?.query?.slug]
+  );
 
   return (
     <Layout
@@ -222,7 +219,11 @@ const Work = ({ works }) => {
         onBackButtonClick={() => setIsModalVisible(!isModalVisible)}
         ImageComponent={() => (
           <div className="relative w-[90%] h-[48%] md:h-[77%]">
-            <NextImage image={currentImage} />
+            <SampleCard
+              item={currentWork}
+              className="relative shrink-0 h-full w-full wrap"
+              blurValue={blur?.default}
+            />
           </div>
         )}
       />

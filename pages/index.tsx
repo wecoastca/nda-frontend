@@ -5,6 +5,7 @@ import Layout from '../components/layout';
 import { fetchAPI } from '../lib/api';
 import { SampleCard } from '../components/card';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 const Home = ({ works }: { works: any; homepage: any }) => {
   const router = useRouter();
@@ -43,12 +44,18 @@ const Home = ({ works }: { works: any; homepage: any }) => {
         onScroll={handleOnScroll}
       >
         {works?.map((x, i) => (
-          <SampleCard
-            item={x}
-            blurValue={12}
-            key={i}
-            className="relative shrink-0 w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] wrap"
-          />
+          <Link
+            key={x?.attributes?.slug}
+            href={`/works/${encodeURIComponent(x?.attributes?.slug)}`}
+          >
+            <a className="select-none">
+              <SampleCard
+                item={x}
+                blurValue={12}
+                className="select-none relative shrink-0 w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] wrap"
+              />
+            </a>
+          </Link>
         ))}
       </div>
     </Layout>
