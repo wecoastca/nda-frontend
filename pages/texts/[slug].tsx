@@ -1,154 +1,315 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
-import Card from '../../components/card';
 import Layout from '../../components/layout';
-import Link from 'next/link';
 import { fetchAPI } from '../../lib/api';
+import { useRouter } from 'next/router';
+import React, {
+  ButtonHTMLAttributes,
+  FC,
+  useCallback,
+  useRef,
+  useState,
+} from 'react';
+import { SampleCard } from '../../components/card';
+import { debounce } from 'lodash';
+import { marked } from 'marked';
+import NextImage from 'next/image';
+import { getStrapiMedia } from '../../lib/media';
 
-const FIELDS = {
-  period: '2018',
-  duration: '1 month',
-  customer: 'SBER',
-  'project position': 'UX-researher',
-  tools: 'Tobii Studio OBS',
-};
-
-const OBJ = {
-  id: 1,
-  attributes: {
-    title: "What's inside a Black Hole",
-    description: 'Maybe the answer is in this article, or not...',
-    content: "Well, we don't know yet...",
-    slug: 'what-s-inside-a-black-hole',
-    createdAt: '2022-01-21T16:57:26.701Z',
-    updatedAt: '2022-01-21T16:57:26.701Z',
-    publishedAt: '2022-01-21T16:57:26.388Z',
-    category: {
-      data: null,
-    },
-    image: {
-      data: {
-        id: 4,
-        attributes: {
-          name: 'what-s-inside-a-black-hole',
-          alternativeText: 'what-s-inside-a-black-hole',
-          caption: 'what-s-inside-a-black-hole',
-          width: 800,
-          height: 466,
-          formats: {
-            thumbnail: {
-              name: 'thumbnail_what-s-inside-a-black-hole',
-              hash: 'thumbnail_what_s_inside_a_black_hole_66bd76c4da',
-              ext: '.jpg',
-              mime: 'image/jpeg',
-              width: 245,
-              height: 143,
-              size: 1.74,
-              path: null,
-              url: '/uploads/thumbnail_what_s_inside_a_black_hole_66bd76c4da.jpg',
-            },
-            medium: {
-              name: 'medium_what-s-inside-a-black-hole',
-              hash: 'medium_what_s_inside_a_black_hole_66bd76c4da',
-              ext: '.jpg',
-              mime: 'image/jpeg',
-              width: 750,
-              height: 437,
-              size: 7.13,
-              path: null,
-              url: '/uploads/medium_what_s_inside_a_black_hole_66bd76c4da.jpg',
-            },
-            small: {
-              name: 'small_what-s-inside-a-black-hole',
-              hash: 'small_what_s_inside_a_black_hole_66bd76c4da',
-              ext: '.jpg',
-              mime: 'image/jpeg',
-              width: 500,
-              height: 291,
-              size: 4.08,
-              path: null,
-              url: '/uploads/small_what_s_inside_a_black_hole_66bd76c4da.jpg',
-            },
-          },
-          hash: 'what_s_inside_a_black_hole_66bd76c4da',
-          ext: '.jpg',
-          mime: 'image/jpeg',
-          size: 7.5,
-          url: '/uploads/what_s_inside_a_black_hole_66bd76c4da.jpg',
-          previewUrl: null,
-          provider: 'local',
-          provider_metadata: null,
-          createdAt: '2022-01-21T16:57:26.684Z',
-          updatedAt: '2022-01-21T16:57:26.684Z',
-        },
-      },
-    },
-    author: {
-      data: {
-        id: 2,
-        attributes: {
-          name: 'Sarah Baker',
-          email: 'sarahbaker@strapi.io',
-          createdAt: '2022-01-21T16:57:26.384Z',
-          updatedAt: '2022-01-21T16:57:26.384Z',
-        },
-      },
-    },
-  },
-};
-
-const Text = () => {
+const NavButton: FC<ButtonHTMLAttributes<any>> = ({
+  onClick,
+  children,
+  ...otherProps
+}) => {
   return (
-    <Layout>
-      <div className="border-r border-yellow-500 h-full w-5/12 flex flex-col  justify-evenly px-8 shrink-0">
-        <p className="text-5xl">Moderated usability testing with eye-tracker</p>
-        <div className="grid grid-cols-2 gap-x-16 gap-y-10">
-          {Object.entries(FIELDS).map(([key, value]) => (
-            <>
-              <div className="text-2xl">{key}</div>
-              <div className="text-3xl">{value}</div>
-            </>
+    <button onClick={onClick && onClick} {...otherProps}>
+      <svg
+        width="24"
+        height="21"
+        viewBox="0 0 24 21"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {children}
+      </svg>
+    </button>
+  );
+};
+
+type WorkModalPropsType = {
+  isVisible: boolean;
+  onBackButtonClick?: () => void;
+  ImageComponent?: React.ElementType;
+};
+const WorkModal: FC<WorkModalPropsType> = ({
+  isVisible,
+  onBackButtonClick,
+  ImageComponent,
+}) => {
+  if (!isVisible) {
+    return null;
+  }
+
+  return (
+    <div className="w-full h-full fixed z-10 bg-white top-0 flex flex-col lg:hidden lg:-z-10">
+      <div className="border-b border-yellow-500 h-12 px-4 md:px-5 md:h-16 flex">
+        <NavButton onClick={onBackButtonClick && onBackButtonClick}>
+          <path
+            d="M10.3409 21L12.0909 19.25L4.88636 12.0682H23.5455V9.56818H4.88636L12.0909 2.36364L10.3409 0.636364L0.159091 10.8182L10.3409 21Z"
+            fill="black"
+          />
+        </NavButton>
+      </div>
+      <div className="flex justify-center items-center h-full">
+        <ImageComponent />
+      </div>
+    </div>
+  );
+};
+
+const Text = ({ works }) => {
+  const router = useRouter();
+  const currentWork = works?.find(
+    (x) => x?.attributes?.slug == router?.query?.slug
+  );
+  const { description, id, ...currentDescription } =
+    currentWork?.attributes?.workDescription;
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [blur, setBlur] = useState({ default: 10, current: 10 });
+  const [isCompact, setIsCompact] = useState(false);
+  const markedHtml = marked.parse(description);
+
+  const handleClickNextWork = () => {
+    const nextIndex = Number(router?.query?.slug) + 1;
+    works?.find((y) => y?.id == nextIndex)
+      ? router?.push(`${nextIndex}`)
+      : router?.push(`1`);
+    setBlur((blur) => ({ ...blur, current: 10 }));
+  };
+
+  const handleClickPreviousWork = () => {
+    const prevIndex = Number(router?.query?.slug) - 1;
+    works?.find((y) => y?.id == prevIndex)
+      ? router?.push(`${prevIndex}`)
+      : router?.push(`${works?.length}`);
+    setBlur((blur) => ({ ...blur, current: 10 }));
+  };
+
+  const handleCardClick = (e) => {
+    // Временное решение, раздели на два компонента
+    if (window.innerWidth < 1024) {
+      setIsModalVisible(!isModalVisible);
+    }
+  };
+
+  const debouncedBlurSet = debounce((scrollTop, scrollHeight, clientHeight) => {
+    const scrollPercent = Number(
+      (scrollTop / (scrollHeight - clientHeight)).toPrecision(1)
+    );
+
+    setBlur((blur) => ({
+      ...blur,
+      current: blur?.default - scrollPercent * blur?.default,
+    }));
+  }, 300);
+
+  const handleOnScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    debouncedBlurSet(
+      e.currentTarget?.scrollTop,
+      e.currentTarget?.scrollHeight,
+      e.currentTarget?.clientHeight
+    );
+  };
+
+  const scrollableRef = useCallback(
+    (node: HTMLDivElement) => {
+      // TODO: поменять на что-то более адекватное
+      setIsCompact(node?.parentElement?.parentElement?.clientWidth < 1024);
+      if (node !== null && node?.clientHeight === node?.scrollHeight) {
+        setBlur((blur) => ({ ...blur, current: 0 }));
+      }
+    },
+    [router?.query?.slug]
+  );
+
+  return (
+    <Layout
+      sidebarProps={{
+        children: (
+          <NavButton
+            onClick={handleClickPreviousWork}
+            className="hidden mx-auto lg:block hover:opacity-60 "
+          >
+            <path
+              d="M10.3409 21L12.0909 19.25L4.88636 12.0682H23.5455V9.56818H4.88636L12.0909 2.36364L10.3409 0.636364L0.159091 10.8182L10.3409 21Z"
+              fill="black"
+            />
+          </NavButton>
+        ),
+      }}
+      layoutContainerProps={{
+        onKeyDown: (e) => {
+          if (e?.key === 'ArrowLeft') {
+            handleClickPreviousWork();
+          }
+          if (e?.key === 'ArrowRight') {
+            handleClickNextWork();
+          }
+        },
+        tabIndex: -1,
+      }}
+    >
+      {/* Nav mobile */}
+      <div className="flex justify-between w-screen sticky border-b border-yellow-500 h-12 px-4 md:px-5 md:h-16 lg:hidden">
+        <NavButton
+          onClick={handleClickPreviousWork}
+          className="active:opacity-60"
+        >
+          <path
+            d="M10.3409 21L12.0909 19.25L4.88636 12.0682H23.5455V9.56818H4.88636L12.0909 2.36364L10.3409 0.636364L0.159091 10.8182L10.3409 21Z"
+            fill="black"
+          />
+        </NavButton>
+        <NavButton onClick={handleClickNextWork} className="active:opacity-60">
+          <path
+            d="M13.2045 21L23.3864 10.8182L13.2045 0.636364L11.4545 2.38636L18.6591 9.56818H0V12.0682H18.6591L11.4545 19.2727L13.2045 21Z"
+            fill="black"
+          />
+        </NavButton>
+      </div>
+      <div
+        onScroll={handleOnScroll}
+        ref={scrollableRef}
+        className="w-screen h-full px-4 pt-6 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-yellow-500 lg:w-[42vw] 2xl:px-8 2xl:pt-28"
+      >
+        <div className="relative w-min flex gap-5">
+          {currentWork?.attributes.categories.data.map((c) => (
+            <div key={c?.id}>
+              <div
+                className={`blur-md h-8 absolute -z-10`}
+                style={{
+                  background: c?.attributes?.color,
+                  width: c?.attributes?.name.length * 12,
+                }}
+              ></div>
+              <div className={`inline-block`}>
+                <span className="text-base z-10">{c?.attributes?.name}</span>
+              </div>
+            </div>
           ))}
         </div>
-        <p className="text-3xl">
-          Lorem Ipsuidopd djdjjdj uddu udjduud3 Lorem Ipsuidopd djdjjdj uddu
-          udjduud3
+
+        <p className="text-lg md:text-2xl lg:text-xl xl:text-2xl">
+          {currentWork?.attributes?.title}
         </p>
-      </div>
-      <div className="h-full p-10 flex items-center border-r border-yellow-500">
-        <Card cardData={OBJ} />
-      </div>
-      <div className="border-r border-yellow-500 h-full w-5/12 flex flex-col  justify-evenly px-8 shrink-0">
-        <p className="text-5xl">Moderated usability testing with eye-tracker</p>
-        <div className="grid grid-cols-2 gap-x-16 gap-y-10">
-          {Object.entries(FIELDS).map(([key, value]) => (
-            <>
-              <div className="text-2xl">{key}</div>
-              <div className="text-3xl">{value}</div>
-            </>
-          ))}
+        <div className="grid grid-cols-2 gap-x-10 gap-y-12 md:gap-x-28 lg:gap-x-16 xl:gap-x-32">
+          {Object.entries(currentDescription).map(([clearKey, value]) => {
+            const key = clearKey.replace(
+              /[A-Z]/g,
+              (match) => ` ${match.toLowerCase()}`
+            );
+            if (typeof value === 'object') {
+              return (
+                <React.Fragment key={key}>
+                  <div className="text-base">{key}</div>
+                  <div className="w-16 md:w-20">
+                    <NextImage
+                      layout="responsive"
+                      // @ts-ignore
+                      width={value.data.attributes.width}
+                      // @ts-ignore
+                      height={value.data.attributes.height}
+                      src={getStrapiMedia(value)}
+                      // @ts-ignore
+                      alt={value.data.attributes.alternativeText}
+                    />
+                  </div>
+                </React.Fragment>
+              );
+            }
+            return (
+              <React.Fragment key={key}>
+                <div className="text-base">{key}</div>
+                <div className="text-xs md:text-lg">{value}</div>
+              </React.Fragment>
+            );
+          })}
         </div>
-        <p className="text-3xl">
-          Lorem Ipsuidopd djdjjdj uddu udjduud3 Lorem Ipsuidopd djdjjdj uddu
-          udjduud3
-        </p>
+        <div
+          className="text-xs md:text-lg"
+          dangerouslySetInnerHTML={{
+            __html: markedHtml,
+          }}
+        />
       </div>
-      <div className="absolute border-2 border-yellow-500 w-36 h-36 rounded-full top-1/2 -right-16 flex items-center p-10">
-        <Link href={'/texts/2'}>
-          <a className="text-3xl">→</a>
-        </Link>
+
+      <div className="lg:h-full lg:w-[54vw] lg:flex lg:items-center lg:justify-center">
+        <button
+          onClick={handleCardClick}
+          className="w-[139px] h-[184px] absolute right-4 bottom-14 md:w-[233px] md:h-[309px] md:right-11 md:bottom-24 lg:relative lg:right-auto lg:bottom-auto lg:w-[75%] lg:h-[78%] lg:cursor-default"
+        >
+          <SampleCard
+            item={currentWork}
+            blurValue={blur?.current}
+            className="relative shrink-0 h-full w-full wrap"
+            isCompact={isCompact}
+          />
+        </button>
       </div>
+      <div className="absolute top-[44%] right-[-46px] border-2 hover:border-4 rounded-full hover:opacity-60 border-[#F9B78B] hover:border-[rgb(249,183,139,0.6)] hidden lg:block">
+        <NavButton
+          onClick={handleClickNextWork}
+          className="m-10 relative right-5"
+        >
+          <path
+            d="M13.2045 21L23.3864 10.8182L13.2045 0.636364L11.4545 2.38636L18.6591 9.56818H0V12.0682H18.6591L11.4545 19.2727L13.2045 21Z"
+            fill="black"
+          />
+        </NavButton>
+      </div>
+      <WorkModal
+        isVisible={isModalVisible}
+        onBackButtonClick={() => setIsModalVisible(!isModalVisible)}
+        ImageComponent={() => (
+          <div className="relative w-[90%] h-[48%] md:h-[77%]">
+            <SampleCard
+              item={currentWork}
+              className="relative shrink-0 h-full w-full wrap"
+              blurValue={blur?.default}
+            />
+          </div>
+        )}
+      />
     </Layout>
   );
 };
 
 export const getStaticProps: GetStaticProps = async () => {
-  return null;
+  // Run API calls in parallel
+  const [categoriesRes, worksRes] = await Promise.all([
+    fetchAPI('/categories', { populate: '*' }),
+    fetchAPI('/works', {
+      populate: [
+        'originalImage',
+        'workDescription.customer',
+        'fakeImage',
+        'categories',
+      ],
+    }),
+  ]);
+  return {
+    props: {
+      categories: categoriesRes.data,
+      works: worksRes.data,
+    },
+  };
 };
 
-// TODO: Измени на то, что будет приходить с бека список работ.
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { data } = await fetchAPI('/articles');
-  const paths = data.map((w) => ({ params: { slug: `${w?.id}` } }));
+  const { data } = await fetchAPI('/works');
+
+  const paths = data.map((w) => ({
+    params: { slug: `${w?.attributes?.slug}` },
+  }));
 
   return {
     paths,

@@ -77,7 +77,6 @@ const Work = ({ works }) => {
   const [blur, setBlur] = useState({ default: 10, current: 10 });
   const [isCompact, setIsCompact] = useState(false);
   const markedHtml = marked.parse(description);
-  const descRef = useRef<HTMLDivElement>(null);
 
   const handleClickNextWork = () => {
     const nextIndex = Number(router?.query?.slug) + 1;

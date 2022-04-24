@@ -2,131 +2,90 @@ import { GetStaticProps } from 'next';
 import Layout from '../../components/layout';
 import { fetchAPI } from '../../lib/api';
 import Link from 'next/link';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
-type TextType = {
-  typeName: 'all' | 'curation' | 'design' | 'research';
-  color: 'bg-pink-400' | 'red' | 'bg-green-300';
-};
-
-type Text = {
-  type: TextType;
-  name: string;
-  url: string;
-};
-const TEXT_TYPES: TextType[] = [
-  { typeName: 'all', color: 'red' },
-  { typeName: 'curation', color: 'red' },
-  { typeName: 'design', color: 'red' },
-  { typeName: 'research', color: 'bg-pink-400' },
-];
-const textS: Text[] = [
-  {
-    type: { typeName: 'research', color: 'bg-pink-400' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/texts/1',
-  },
-  {
-    type: { typeName: 'research', color: 'bg-pink-400' },
-    name: 'Moderated non-laboratory usability testing of the ATMs →',
-    url: '/texts/2',
-  },
-  {
-    type: { typeName: 'research', color: 'bg-pink-400' },
-    name: 'Moderated non-laboratory usability testing of the ATMs →',
-    url: '/texts/3',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-green-300' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/texts/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-green-300' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/texts/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-green-300' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/texts/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-green-300' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/texts/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-green-300' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/texts/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-green-300' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/texts/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-green-300' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/texts/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-green-300' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/texts/1',
-  },
-  {
-    type: { typeName: 'design', color: 'bg-green-300' },
-    name: 'Moderated usability testing with eye-tracker →',
-    url: '/texts/1',
-  },
-];
-
-const Texts = ({ categories }) => {
-  const [textCategory, setTextCategory] = useState<string>('all');
+const Texts = ({ categories, works }) => {
+  const [workCategory, setWorkCategory] = useState<string>('all');
 
   return (
     <Layout>
-      {/* Inline navigation */}
-      {/*   */}
       <div className="shrink-0 border-yellow-500 border-b lg:border-b-0 lg:border-r lg:w-[42vw] lg:py-28">
         <ul className="flex text-sm gap-9 w-screen overflow-scroll px-4 md:text-xl md:gap-16 lg:gap-5 lg:w-auto lg:flex-col xl:text-2xl xl:px-6">
-          {TEXT_TYPES?.map((type) => (
-            <li key={type.typeName}>
+          <li>
+            <button
+              value={'all'}
+              onClick={(e) => setWorkCategory(e?.currentTarget?.value)}
+              className={`hover:opacity-20 visited:line-through ${
+                workCategory === 'all' ? 'line-through' : null
+              }`}
+            >
+              all
+            </button>
+          </li>
+          {categories?.map((item) => (
+            <li key={item.id}>
               <button
-                value={type.typeName}
-                onClick={(e) => setTextCategory(e?.currentTarget?.value)}
+                value={item?.attributes.name}
+                onClick={(e) => setWorkCategory(e?.currentTarget?.value)}
                 className={`hover:opacity-20 visited:line-through ${
-                  textCategory === type.typeName ? 'line-through' : null
+                  workCategory === item.attributes?.name ? 'line-through' : null
                 }`}
               >
-                {type.typeName}
+                {item?.attributes?.name}
               </button>
             </li>
           ))}
         </ul>
       </div>
 
-      {/* Table */}
-      <div className="grid overflow-scroll md:grid-cols-2 lg:grid-cols-none lg:grid-rows-2 lg:grid-flow-col lg:w-[54vw] lg:auto-cols-[100%] xl:auto-cols-[50%] 2xl:auto-cols-[33%]">
-        {textS.map((text, i) => (
-          <div
-            key={text?.name}
-            //   i % 2 === 0 ? 'border-b' : ''
-            className={`border-yellow-500 border-r px-8 py-12 flex flex-col gap-8 relative border-b`}
-          >
-            <div
-              className={`${text?.type?.color} blur-xl h-6 w-24 absolute`}
-            ></div>
-            <span className="text-base z-10">{text?.type?.typeName}</span>
-            <Link href={text?.url}>
-              <a className="hover:opacity-20 text-lg">
-                <p>{text?.name}</p>
-              </a>
-            </Link>
-          </div>
-        ))}
+      <div className="grid overflow-x-scroll md:grid-cols-2 lg:grid-cols-none lg:grid-rows-2 lg:grid-flow-col lg:w-[54vw] lg:auto-cols-[100%] xl:auto-cols-[50%] 2xl:auto-cols-[33%]">
+        {works
+          .filter(
+            (x) =>
+              !!x?.attributes?.categories?.data?.find(
+                (z) => z?.attributes?.name === workCategory
+              ) || workCategory === 'all'
+          )
+          .map((work) => {
+            return (
+              <div
+                key={work?.id}
+                className={`border-yellow-500 border-r px-8 py-12 flex flex-col gap-8 border-b`}
+              >
+                <div className="relative w-min flex gap-5">
+                  {work?.attributes?.categories?.data?.map((c) => (
+                    <div key={c?.id}>
+                      <div
+                        className={` blur-md h-8 absolute -z-10`}
+                        style={{
+                          background: c?.attributes?.color,
+                          width: c?.attributes?.name.length * 12,
+                        }}
+                      ></div>
+                      <button
+                        value={c?.attributes?.name}
+                        onClick={(e) =>
+                          setWorkCategory(e?.currentTarget?.value)
+                        }
+                        className={`hover:opacity-20 visited:line-through inline-block`}
+                      >
+                        <span className="text-base z-10">
+                          {c?.attributes?.name}
+                        </span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <Link
+                  href={`/works/${encodeURIComponent(work?.attributes?.slug)}`}
+                >
+                  <a className="hover:opacity-20 text-lg">
+                    <p>{work?.attributes?.title}</p>
+                  </a>
+                </Link>
+              </div>
+            );
+          })}
       </div>
     </Layout>
   );
@@ -134,13 +93,15 @@ const Texts = ({ categories }) => {
 
 export const getStaticProps: GetStaticProps = async () => {
   // Run API calls in parallel
-  const [categoriesRes] = await Promise.all([
+  const [{ data: categories }, { data: works }] = await Promise.all([
     fetchAPI('/categories', { populate: '*' }),
+    fetchAPI('/works', { populate: '*' }),
   ]);
 
   return {
     props: {
-      categories: categoriesRes.data,
+      categories,
+      works,
     },
   };
 };

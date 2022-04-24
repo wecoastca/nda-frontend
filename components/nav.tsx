@@ -46,6 +46,10 @@ const Nav = () => {
                         item.attributes.slug
                           ? 'line-through'
                           : null
+                      } ${
+                        !item.attributes.isActive
+                          ? 'opacity-20 pointer-events-none cursor-default'
+                          : null
                       }`}
                     >
                       {item.attributes.name}
