@@ -1,30 +1,76 @@
-import App, {AppProps} from "next/app"
-import Head from "next/head"
-import "../assets/css/style.css"
-import { createContext } from "react"
-import { fetchAPI } from "../lib/api"
-import { getStrapiMedia } from "../lib/media"
+import App, { AppProps } from 'next/app';
+import Head from 'next/head';
+import '../assets/css/style.css';
+import { createContext } from 'react';
+import { fetchAPI } from '../lib/api';
+import { getStrapiMedia } from '../lib/media';
+
+export type BaseResponse<T> = {
+  data: {
+    id: number;
+    attributes: T;
+  };
+};
+
+export type ImageResponseType = {
+  alternativeText: string;
+  caption: string;
+  createdAt: string;
+  ext: string;
+  formats: string;
+  hash: string;
+  height: number;
+  mime: string;
+  name: string;
+  previewUrl: string;
+  provider: string;
+  provider_metadata: string;
+  size: number;
+  updatedAt: string;
+  url: string;
+  width: number;
+};
+
+export type MetaType = {
+  siteName: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+  favicon: BaseResponse<ImageResponseType>;
+  logo: BaseResponse<ImageResponseType>;
+  footer: {
+    id: number;
+    linkColor: string;
+    isBluredLink: boolean;
+    content: string;
+  };
+  indexFooter: {
+    id: number;
+    linkColor: string;
+    isBluredLink: boolean;
+    content: string;
+  };
+};
 
 // Store Strapi Global object in context
-export const GlobalContext = createContext({})
+export const MetaContext = createContext<MetaType>(null);
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
-  const { global } = pageProps
-
+  const { meta } = pageProps;
   return (
     <>
       <Head>
         <link
           rel="shortcut icon"
-          href={getStrapiMedia(global.attributes.favicon)}
+          href={getStrapiMedia(meta.attributes.favicon)}
         />
       </Head>
-      <GlobalContext.Provider value={global.attributes}>
+      <MetaContext.Provider value={meta.attributes}>
         <Component {...pageProps} />
-      </GlobalContext.Provider>
+      </MetaContext.Provider>
     </>
-  )
-}
+  );
+};
 
 // getInitialProps disables automatic static optimization for pages that don't
 // have getStaticProps. So article, category and home pages still get SSG.
@@ -32,18 +78,13 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
 // https://github.com/vercel/next.js/discussions/10949
 MyApp.getInitialProps = async (ctx) => {
   // Calls page's `getInitialProps` and fills `appProps.pageProps`
-  const appProps = await App.getInitialProps(ctx)
+  const appProps = await App.getInitialProps(ctx);
   // Fetch global site settings from Strapi
-  const globalRes = await fetchAPI("/global", {
-    populate: {
-      favicon: "*",
-      defaultSeo: {
-        populate: "*",
-      },
-    },
-  })
+  const metaRes = await fetchAPI('/meta', {
+    populate: '*',
+  });
   // Pass the data to our page via props
-  return { ...appProps, pageProps: { global: globalRes.data } }
-}
+  return { ...appProps, pageProps: { meta: metaRes.data } };
+};
 
-export default MyApp
+export default MyApp;

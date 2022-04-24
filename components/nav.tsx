@@ -1,12 +1,24 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import { fetchAPI } from '../lib/api';
+import NextImage from 'next/image';
+import { MetaContext } from '../pages/_app';
+import { getStrapiMedia } from '../lib/media';
+
+const Logo = ({ image }) => (
+  <NextImage
+    layout="fill"
+    src={getStrapiMedia(image)}
+    alt={image?.data?.attributes?.alternativeText}
+    priority
+  />
+);
 
 const Nav = () => {
-  const { data } = useSWR(['/navigation-items'], fetchAPI);
-
+  const { data: navigationItems } = useSWR(['/navigation-items'], fetchAPI);
+  const meta = useContext<any>(MetaContext);
   const router = useRouter();
 
   return (
@@ -14,11 +26,15 @@ const Nav = () => {
       <nav className="flex md:gap-2 order-2 w-full md:w-auto md:order-1">
         <Link href="/">
           <a>
-            <div className="w-14 h-14 md:w-20 md:h-20 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-neutral-400 border-r border-yellow-500 hidden md:block"></div>
+            <div className="w-14 h-14 md:w-20 md:h-20 lg:w-16 lg:h-16 xl:w-20 xl:h-20 border-r border-yellow-500 hidden md:block">
+              <div className="w-full h-full relative">
+                <Logo image={meta?.logo} />
+              </div>
+            </div>
           </a>
         </Link>
         <ul className="flex md:gap-8 items-center w-full md:w-auto justify-between md:justify-start px-4 md:px-0">
-          {data?.data
+          {navigationItems?.data
             ?.sort((a, b) => a?.attributes?.order - b?.attributes?.order)
             .map((item) => {
               return (
@@ -43,7 +59,11 @@ const Nav = () => {
       <div className="md:mr-4 order-1 md:order-2 flex justify-between w-full md:w-auto border-b border-yellow-500 md:border-0">
         <Link href="/">
           <a>
-            <div className="w-14 h-14 md:w-20 md:h-20 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-neutral-400 md:hidden"></div>
+            <div className="w-14 h-14 md:w-20 md:h-20 lg:w-16 lg:h-16 xl:w-20 xl:h-20 md:hidden">
+              <div className="w-full h-full relative">
+                <Logo image={meta?.logo} />
+              </div>
+            </div>
           </a>
         </Link>
         <a href="mailto:test@test.com" className="self-center mr-4 md:mr-8">

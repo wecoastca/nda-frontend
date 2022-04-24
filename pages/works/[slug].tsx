@@ -2,9 +2,18 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import Layout from '../../components/layout';
 import { fetchAPI } from '../../lib/api';
 import { useRouter } from 'next/router';
-import React, { ButtonHTMLAttributes, FC, useCallback, useState } from 'react';
+import React, {
+  ButtonHTMLAttributes,
+  FC,
+  useCallback,
+  useRef,
+  useState,
+} from 'react';
 import { SampleCard } from '../../components/card';
 import { debounce } from 'lodash';
+import { marked } from 'marked';
+import NextImage from 'next/image';
+import { getStrapiMedia } from '../../lib/media';
 
 const NavButton: FC<ButtonHTMLAttributes<any>> = ({
   onClick,
@@ -62,16 +71,13 @@ const Work = ({ works }) => {
   const currentWork = works?.find(
     (x) => x?.attributes?.slug == router?.query?.slug
   );
-  const {
-    createdAt,
-    description,
-    publishedAt,
-    updatedAt,
-    ...currentDescription
-  } = currentWork?.attributes?.workDescription?.data?.attributes;
+  const { description, id, ...currentDescription } =
+    currentWork?.attributes?.workDescription;
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [blur, setBlur] = useState({ default: 10, current: 10 });
   const [isCompact, setIsCompact] = useState(false);
+  const markedHtml = marked.parse(description);
+  const descRef = useRef<HTMLDivElement>(null);
 
   const handleClickNextWork = () => {
     const nextIndex = Number(router?.query?.slug) + 1;
@@ -174,20 +180,67 @@ const Work = ({ works }) => {
       <div
         onScroll={handleOnScroll}
         ref={scrollableRef}
-        className="w-screen h-full px-4 pt-3 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-yellow-500 lg:w-[42vw] 2xl:px-8 2xl:pt-28"
+        className="w-screen h-full px-4 pt-6 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-yellow-500 lg:w-[42vw] 2xl:px-8 2xl:pt-28"
       >
+        <div className="relative w-min flex gap-5">
+          {currentWork?.attributes.categories.data.map((c) => (
+            <div key={c?.id}>
+              <div
+                className={`blur-md h-8 absolute -z-10`}
+                style={{
+                  background: c?.attributes?.color,
+                  width: c?.attributes?.name.length * 12,
+                }}
+              ></div>
+              <div className={`inline-block`}>
+                <span className="text-base z-10">{c?.attributes?.name}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <p className="text-lg md:text-2xl lg:text-xl xl:text-2xl">
           {currentWork?.attributes?.title}
         </p>
         <div className="grid grid-cols-2 gap-x-10 gap-y-12 md:gap-x-28 lg:gap-x-16 xl:gap-x-32">
-          {Object.entries(currentDescription).map(([key, value]) => (
-            <React.Fragment key={key}>
-              <div className="text-base">{key}</div>
-              <div className="text-xs md:text-lg">{value}</div>
-            </React.Fragment>
-          ))}
+          {Object.entries(currentDescription).map(([clearKey, value]) => {
+            const key = clearKey.replace(
+              /[A-Z]/g,
+              (match) => ` ${match.toLowerCase()}`
+            );
+            if (typeof value === 'object') {
+              return (
+                <React.Fragment key={key}>
+                  <div className="text-base">{key}</div>
+                  <div className="w-16 md:w-20">
+                    <NextImage
+                      layout="responsive"
+                      // @ts-ignore
+                      width={value.data.attributes.width}
+                      // @ts-ignore
+                      height={value.data.attributes.height}
+                      src={getStrapiMedia(value)}
+                      // @ts-ignore
+                      alt={value.data.attributes.alternativeText}
+                    />
+                  </div>
+                </React.Fragment>
+              );
+            }
+            return (
+              <React.Fragment key={key}>
+                <div className="text-base">{key}</div>
+                <div className="text-xs md:text-lg">{value}</div>
+              </React.Fragment>
+            );
+          })}
         </div>
-        <p className="text-xs md:text-lg">{description}</p>
+        <div
+          className="text-xs md:text-lg"
+          dangerouslySetInnerHTML={{
+            __html: markedHtml,
+          }}
+        />
       </div>
 
       <div className="lg:h-full lg:w-[54vw] lg:flex lg:items-center lg:justify-center">
@@ -235,8 +288,14 @@ export const getStaticProps: GetStaticProps = async () => {
   // Run API calls in parallel
   const [categoriesRes, worksRes] = await Promise.all([
     fetchAPI('/categories', { populate: '*' }),
-    //TODO: Call request for the current work not for all works
-    fetchAPI('/works', { populate: '*' }),
+    fetchAPI('/works', {
+      populate: [
+        'originalImage',
+        'workDescription.customer',
+        'fakeImage',
+        'categories',
+      ],
+    }),
   ]);
   return {
     props: {

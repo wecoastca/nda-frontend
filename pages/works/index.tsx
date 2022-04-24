@@ -4,29 +4,11 @@ import { fetchAPI } from '../../lib/api';
 import Link from 'next/link';
 import React, { useState } from 'react';
 
-type WorkType = {
-  typeName: 'all' | 'curation' | 'design' | 'research';
-  color: string;
-};
-
-type Work = {
-  type: WorkType;
-  name: string;
-  url: string;
-};
-
-const CATEGORIES_COLORS: WorkType[] = [
-  { typeName: 'curation', color: 'bg-lime-400' },
-  { typeName: 'design', color: 'bg-orange-400' },
-  { typeName: 'research', color: 'bg-pink-400' },
-];
-
 const Works = ({ categories, works }) => {
   const [workCategory, setWorkCategory] = useState<string>('all');
 
   return (
     <Layout>
-      {/* Inline navigation */}
       <div className="shrink-0 border-yellow-500 border-b lg:border-b-0 lg:border-r lg:w-[42vw] lg:py-28">
         <ul className="flex text-sm gap-9 w-screen overflow-scroll px-4 md:text-xl md:gap-16 lg:gap-5 lg:w-auto lg:flex-col xl:text-2xl xl:px-6">
           <li>
@@ -56,7 +38,6 @@ const Works = ({ categories, works }) => {
         </ul>
       </div>
 
-      {/* Table */}
       <div className="grid overflow-x-scroll md:grid-cols-2 lg:grid-cols-none lg:grid-rows-2 lg:grid-flow-col lg:w-[54vw] lg:auto-cols-[100%] xl:auto-cols-[50%] 2xl:auto-cols-[33%]">
         {works
           .filter(
@@ -75,11 +56,11 @@ const Works = ({ categories, works }) => {
                   {work?.attributes?.categories?.data?.map((c) => (
                     <div key={c?.id}>
                       <div
-                        className={`${
-                          CATEGORIES_COLORS.find(
-                            (x) => x?.typeName === c?.attributes?.name
-                          )?.color
-                        } blur-md h-8 w-24 absolute -z-10`}
+                        className={` blur-md h-8 absolute -z-10`}
+                        style={{
+                          background: c?.attributes?.color,
+                          width: c?.attributes?.name.length * 12,
+                        }}
                       ></div>
                       <button
                         value={c?.attributes?.name}

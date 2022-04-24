@@ -6,10 +6,11 @@ import { fetchAPI } from '../lib/api';
 import { SampleCard } from '../components/card';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { marked } from 'marked';
 
-const Home = ({ works }: { works: any; homepage: any }) => {
+const Home = ({ works, homepage }: { works: any; homepage: any }) => {
   const router = useRouter();
-
+  const markedHtml = marked.parse(homepage?.description);
   const handleOnScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
     const scrollPercent =
       e.currentTarget?.scrollLeft /
@@ -24,13 +25,13 @@ const Home = ({ works }: { works: any; homepage: any }) => {
   return (
     <Layout>
       <div className="flex flex-col px-4 justify-around w-screen gap-5 pt-4 md:pt-8 md:gap-10 lg:gap-0 lg:px-5 lg:border-r lg:border-yellow-500 lg:w-[42vw]">
-        <p className="text-base md:text-xl xl:text-2xl">
-          All works are blured until we dive into the process and restrictions.
-        </p>
-        <div className="md:text-base">
-          With hover you could pry about the final decisions but don’t have a
-          clue why they was made.
-        </div>
+        <p className="text-base md:text-xl xl:text-2xl">{homepage?.title}</p>
+        <div
+          className="md:text-base"
+          dangerouslySetInnerHTML={{
+            __html: markedHtml,
+          }}
+        />
       </div>
 
       <div
@@ -43,43 +44,37 @@ const Home = ({ works }: { works: any; homepage: any }) => {
         }}
         onScroll={handleOnScroll}
       >
-        {works?.map((x, i) => (
-          <Link
-            key={x?.attributes?.slug}
-            href={`/works/${encodeURIComponent(x?.attributes?.slug)}`}
-          >
-            <a className="select-none">
-              <SampleCard
-                item={x}
-                blurValue={12}
-                className="select-none relative shrink-0 w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] wrap"
-              />
-            </a>
-          </Link>
-        ))}
+        {works?.map((x) => {
+          return (
+            <Link
+              key={x?.attributes?.slug}
+              href={`/works/${encodeURIComponent(x?.attributes?.slug)}`}
+            >
+              <a className="select-none">
+                <SampleCard
+                  item={x}
+                  blurValue={12}
+                  className="select-none relative shrink-0 w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] wrap"
+                />
+              </a>
+            </Link>
+          );
+        })}
       </div>
     </Layout>
   );
 };
 
 export const getStaticProps: GetStaticProps = async () => {
-  // Run API calls in parallel
   const [worksRes, homepageRes] = await Promise.all([
     fetchAPI('/works', { populate: '*' }),
-    fetchAPI('/homepage', {
-      populate: {
-        hero: '*',
-        seo: { populate: '*' },
-      },
-    }),
+    fetchAPI('/homepage', { populate: '*' }),
   ]);
-
   return {
     props: {
       works: worksRes.data,
-      homepage: homepageRes.data,
+      homepage: homepageRes.data.attributes,
     },
-    revalidate: 1,
   };
 };
 

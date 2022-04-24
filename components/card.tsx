@@ -58,11 +58,14 @@ export const SampleCard = ({
         }}
         ref={imageContainerRef}
       >
-        <NextImage image={originalImage} alt="scene" />
+        <NextImage
+          image={originalImage}
+          alt={originalImage.data.attributes.alternativeText}
+        />
         {fakeImageSrc && isNDA && (
           <img
             src={fakeImageSrc}
-            alt="fakeImage"
+            alt={fakeImage.data.attributes.alternativeText}
             className="h-full w-full absolute"
             style={{ opacity: blurValue / 10 }}
           />
