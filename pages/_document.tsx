@@ -28,7 +28,7 @@ class MyDocument extends Document {
             src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.2.0/js/uikit.js"
           />
         </Head>
-        <body>
+        <body className="overflow-hidden">
           <Main />
           <NextScript />
         </body>
