@@ -67,3 +67,7 @@ img:hover {
 .wrap:hover .viewer{
   opacity: 1;
 }
+
+.work-block:hover #blurCircle {
+  filter: blur(24px);
+}

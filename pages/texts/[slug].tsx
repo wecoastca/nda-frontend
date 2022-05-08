@@ -51,7 +51,7 @@ const WorkModal: FC<WorkModalPropsType> = ({
 
   return (
     <div className="w-full h-full fixed z-10 bg-white top-0 flex flex-col lg:hidden lg:-z-10">
-      <div className="border-b border-yellow-500 h-12 px-4 md:px-5 md:h-16 flex">
+      <div className="border-b border-[#FA6400] h-12 px-4 md:px-5 md:h-16 flex">
         <NavButton onClick={onBackButtonClick && onBackButtonClick}>
           <path
             d="M10.3409 21L12.0909 19.25L4.88636 12.0682H23.5455V9.56818H4.88636L12.0909 2.36364L10.3409 0.636364L0.159091 10.8182L10.3409 21Z"
@@ -159,7 +159,7 @@ const Text = ({ works }) => {
       }}
     >
       {/* Nav mobile */}
-      <div className="flex justify-between w-screen sticky border-b border-yellow-500 h-12 px-4 md:px-5 md:h-16 lg:hidden">
+      <div className="flex justify-between w-screen sticky border-b border-[#FA6400] h-12 px-4 md:px-5 md:h-16 lg:hidden">
         <NavButton
           onClick={handleClickPreviousWork}
           className="active:opacity-60"
@@ -179,7 +179,7 @@ const Text = ({ works }) => {
       <div
         onScroll={handleOnScroll}
         ref={scrollableRef}
-        className="w-screen h-full px-4 pt-6 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-yellow-500 lg:w-[42vw] 2xl:px-8 2xl:pt-28"
+        className="w-screen h-full px-4 pt-6 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-[#FA6400] lg:w-[42vw] 2xl:px-8 2xl:pt-28"
       >
         <div className="relative w-min flex gap-5">
           {currentWork?.attributes.categories.data.map((c) => (

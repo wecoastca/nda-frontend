@@ -24,7 +24,7 @@ const Home = ({ works, homepage }: { works: any; homepage: any }) => {
   // TODO: Левый и правый блок вынести в отдельные компоненты
   return (
     <Layout>
-      <div className="flex flex-col px-4 justify-around w-screen gap-5 pt-4 md:pt-8 md:gap-10 lg:gap-0 lg:px-5 lg:border-r lg:border-yellow-500 lg:w-[42vw]">
+      <div className="flex flex-col px-4 justify-around w-screen gap-5 pt-4 md:pt-8 md:gap-10 lg:gap-0 lg:px-5 lg:border-r lg:border-[#FA6400] lg:w-[42vw]">
         <p className="text-base md:text-xl xl:text-2xl">{homepage?.title}</p>
         <div
           className="md:text-base"

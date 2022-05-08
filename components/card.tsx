@@ -46,7 +46,6 @@ export const SampleCard = ({
       y: e?.clientY - rect?.top - rect?.height / 4,
     }));
   };
-
   return (
     <div className={className + ' overflow-hidden'}>
       <div
@@ -71,7 +70,7 @@ export const SampleCard = ({
           />
         )}
       </div>
-      {!isCompact && (
+      {!isCompact && blurValue !== 0 && (
         <div
           className="z-10 absolute w-48 h-48 rounded-full transition-opacity pointer-events-none opacity-0 viewer"
           style={{

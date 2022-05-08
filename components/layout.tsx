@@ -34,7 +34,7 @@ const Footer = () => {
 
   return (
     <div
-      className="bottom-0 w-full h-10 md:h-16 lg:h-14 2xl:h-20 border-t border-yellow-500 bg-white flex items-center sticky px-4 whitespace-nowrap overflow-x-scroll overflow-y-hidden"
+      className="bottom-0 w-full h-10 md:h-16 lg:h-14 2xl:h-20 border-t border-[#FA6400] bg-white flex items-center sticky px-4 whitespace-nowrap overflow-x-scroll overflow-y-hidden"
       dangerouslySetInnerHTML={{
         __html: markedContent,
       }}
@@ -50,7 +50,7 @@ const Layout = ({
 }: {
   children: any;
   sidebarProps?: any;
-  layoutContainerProps?: React.ComponentPropsWithoutRef<'div'>;
+  layoutContainerProps?: React.ComponentProps<'div'>;
 }) => {
   return (
     <div
@@ -59,9 +59,9 @@ const Layout = ({
       {...layoutContainerProps}
     >
       <Nav />
-      <div className="flex w-screen overflow-hidden flex-1">
+      <div className="flex w-screen overflow-hidden flex-1 mb-10 md:mb-16 lg:mb-0">
         <div
-          className="hidden w-16 xl:w-20 border-r border-yellow-500 lg:flex shrink-0"
+          className="hidden w-16 xl:w-20 border-r border-[#FA6400] lg:flex shrink-0"
           {...sidebarProps}
         ></div>
         <div className="flex flex-col lg:my-0 lg:flex-row lg:justify-start">

@@ -22,11 +22,11 @@ const Nav = () => {
   const router = useRouter();
 
   return (
-    <div className="sticky flex justify-between flex-wrap w-full bg-white z-10 border-b border-yellow-500">
+    <div className="sticky flex justify-between flex-wrap w-full bg-white z-10 border-b border-[#FA6400]">
       <nav className="flex md:gap-2 order-2 w-full md:w-auto md:order-1">
         <Link href="/">
           <a>
-            <div className="w-14 h-14 md:w-20 md:h-20 lg:w-16 lg:h-16 xl:w-20 xl:h-20 border-r border-yellow-500 hidden md:block">
+            <div className="w-14 h-14 md:w-20 md:h-20 lg:w-16 lg:h-16 xl:w-20 xl:h-20 border-r border-[#FA6400] hidden md:block">
               <div className="w-full h-full relative">
                 <Logo image={meta?.logo} />
               </div>
@@ -60,7 +60,7 @@ const Nav = () => {
             })}
         </ul>
       </nav>
-      <div className="md:mr-4 order-1 md:order-2 flex justify-between w-full md:w-auto border-b border-yellow-500 md:border-0">
+      <div className="md:mr-4 order-1 md:order-2 flex justify-between w-full md:w-auto border-b border-[#FA6400] md:border-0">
         <Link href="/">
           <a>
             <div className="w-14 h-14 md:w-20 md:h-20 lg:w-16 lg:h-16 xl:w-20 xl:h-20 md:hidden">

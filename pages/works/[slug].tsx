@@ -6,6 +6,7 @@ import React, {
   ButtonHTMLAttributes,
   FC,
   useCallback,
+  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -51,7 +52,7 @@ const WorkModal: FC<WorkModalPropsType> = ({
 
   return (
     <div className="w-full h-full fixed z-10 bg-white top-0 flex flex-col lg:hidden lg:-z-10">
-      <div className="border-b border-yellow-500 h-12 px-4 md:px-5 md:h-16 flex">
+      <div className="border-b border-[#FA6400] h-12 px-4 md:px-5 md:h-16 flex">
         <NavButton onClick={onBackButtonClick && onBackButtonClick}>
           <path
             d="M10.3409 21L12.0909 19.25L4.88636 12.0682H23.5455V9.56818H4.88636L12.0909 2.36364L10.3409 0.636364L0.159091 10.8182L10.3409 21Z"
@@ -77,6 +78,22 @@ const Work = ({ works }) => {
   const [blur, setBlur] = useState({ default: 10, current: 10 });
   const [isCompact, setIsCompact] = useState(false);
   const markedHtml = marked.parse(description);
+  const scrollableRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsCompact(window.innerWidth < 1024);
+  }, []);
+
+  useEffect(() => {
+    if (
+      scrollableRef.current?.clientHeight ===
+      scrollableRef.current?.scrollHeight
+    ) {
+      setBlur((blur) => ({ ...blur, current: 0 }));
+    } else {
+      scrollableRef.current?.scroll(0, 0);
+    }
+  }, [router?.query?.slug, scrollableRef]);
 
   const handleClickNextWork = () => {
     const nextIndex = Number(router?.query?.slug) + 1;
@@ -120,15 +137,16 @@ const Work = ({ works }) => {
     );
   };
 
-  const scrollableRef = useCallback(
-    (node: HTMLDivElement) => {
-      // TODO: поменять на что-то более адекватное
-      setIsCompact(node?.parentElement?.parentElement?.clientWidth < 1024);
-      if (node !== null && node?.clientHeight === node?.scrollHeight) {
-        setBlur((blur) => ({ ...blur, current: 0 }));
+  const handleOnWheel = useCallback(
+    (e: React.WheelEvent<HTMLDivElement>) => {
+      if (
+        scrollableRef.current?.clientHeight !==
+        scrollableRef.current.scrollHeight
+      ) {
+        scrollableRef.current.scrollBy(0, e.deltaY);
       }
     },
-    [router?.query?.slug]
+    [scrollableRef]
   );
 
   return (
@@ -155,11 +173,12 @@ const Work = ({ works }) => {
             handleClickNextWork();
           }
         },
+        onWheel: handleOnWheel,
         tabIndex: -1,
       }}
     >
       {/* Nav mobile */}
-      <div className="flex justify-between w-screen sticky border-b border-yellow-500 h-12 px-4 md:px-5 md:h-16 lg:hidden">
+      <div className="flex justify-between w-screen sticky border-b border-[#FA6400] h-12 px-4 md:px-5 md:h-16 lg:hidden">
         <NavButton
           onClick={handleClickPreviousWork}
           className="active:opacity-60"
@@ -179,7 +198,7 @@ const Work = ({ works }) => {
       <div
         onScroll={handleOnScroll}
         ref={scrollableRef}
-        className="w-screen h-full px-4 pt-6 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-yellow-500 lg:w-[42vw] 2xl:px-8 2xl:pt-28"
+        className="w-screen h-full px-4 pt-6 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-[#FA6400] lg:w-[42vw] 2xl:px-8 2xl:pt-28"
       >
         <div className="relative w-min flex gap-5">
           {currentWork?.attributes.categories.data.map((c) => (
@@ -191,9 +210,15 @@ const Work = ({ works }) => {
                   width: c?.attributes?.name.length * 12,
                 }}
               ></div>
-              <div className={`inline-block`}>
+              <button
+                className={`inline-block hover:opacity-20`}
+                value={c?.attributes?.name}
+                onClick={(e) => {
+                  router.push(`/works?c=${e.currentTarget?.value}`);
+                }}
+              >
                 <span className="text-base z-10">{c?.attributes?.name}</span>
-              </div>
+              </button>
             </div>
           ))}
         </div>
@@ -210,7 +235,7 @@ const Work = ({ works }) => {
             if (typeof value === 'object') {
               return (
                 <React.Fragment key={key}>
-                  <div className="text-base">{key}</div>
+                  <div className="text-base self-center">{key}</div>
                   <div className="w-16 md:w-20">
                     <NextImage
                       layout="responsive"
@@ -228,8 +253,8 @@ const Work = ({ works }) => {
             }
             return (
               <React.Fragment key={key}>
-                <div className="text-base">{key}</div>
-                <div className="text-xs md:text-lg">{value}</div>
+                <div className="text-base self-center">{key}</div>
+                <div className="text-xs md:text-lg self-center">{value}</div>
               </React.Fragment>
             );
           })}
@@ -274,7 +299,7 @@ const Work = ({ works }) => {
             <SampleCard
               item={currentWork}
               className="relative shrink-0 h-full w-full wrap"
-              blurValue={blur?.default}
+              blurValue={blur?.current}
             />
           </div>
         )}
