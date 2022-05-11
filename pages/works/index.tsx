@@ -55,7 +55,7 @@ const Works = ({ categories, works }) => {
             return (
               <div
                 key={work?.id}
-                className={`border-[#FA6400] hover:border-[#FD6703] hover:border-2 border-r px-8 py-12 flex flex-col gap-8 border-b work-block last:border-b-0 md:last:border-b lg:even:border-b-0`}
+                className={`border-[#FA6400] hover:border-[#FD6703] hover:border-2 border-r px-8 py-12 flex flex-col gap-8 border-b work-block last:border-b-0 md:last:border-b lg:even:border-b-0 lg:hover:border-2`}
               >
                 <div className="relative w-min flex gap-5">
                   {work?.attributes?.categories?.data?.map((c) => (
@@ -109,6 +109,7 @@ export const getStaticProps: GetStaticProps = async () => {
       categories,
       works,
     },
+    revalidate: 10,
   };
 };
 

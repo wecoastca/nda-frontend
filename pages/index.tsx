@@ -75,6 +75,7 @@ export const getStaticProps: GetStaticProps = async () => {
       works: worksRes.data,
       homepage: homepageRes.data.attributes,
     },
+    revalidate: 10,
   };
 };
 

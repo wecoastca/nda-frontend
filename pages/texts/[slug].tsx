@@ -301,6 +301,7 @@ export const getStaticProps: GetStaticProps = async () => {
       categories: categoriesRes.data,
       works: worksRes.data,
     },
+    revalidate: 10,
   };
 };
 

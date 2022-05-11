@@ -9,7 +9,7 @@ const Texts = ({ categories, works }) => {
 
   return (
     <Layout>
-      <div className="shrink-0 border-yellow-500 border-b lg:border-b-0 lg:border-r lg:w-[42vw] lg:py-28">
+      <div className="shrink-0 border-[#FA6400] border-b lg:border-b-0 lg:border-r lg:w-[42vw] lg:py-28">
         <ul className="flex text-sm gap-9 w-screen overflow-scroll px-4 md:text-xl md:gap-16 lg:gap-5 lg:w-auto lg:flex-col xl:text-2xl xl:px-6">
           <li>
             <button
@@ -50,13 +50,14 @@ const Texts = ({ categories, works }) => {
             return (
               <div
                 key={work?.id}
-                className={`border-yellow-500 border-r px-8 py-12 flex flex-col gap-8 border-b`}
+                className={`border-[#FA6400] hover:border-[#FD6703] hover:border-2 border-r px-8 py-12 flex flex-col gap-8 border-b work-block last:border-b-0 md:last:border-b lg:even:border-b-0 lg:hover:border-2`}
               >
                 <div className="relative w-min flex gap-5">
                   {work?.attributes?.categories?.data?.map((c) => (
                     <div key={c?.id}>
                       <div
-                        className={` blur-md h-8 absolute -z-10`}
+                        className={`blur-md h-8 absolute -z-10`}
+                        id="blurCircle"
                         style={{
                           background: c?.attributes?.color,
                           width: c?.attributes?.name.length * 12,
@@ -103,6 +104,7 @@ export const getStaticProps: GetStaticProps = async () => {
       categories,
       works,
     },
+    revalidate: 10,
   };
 };
 
