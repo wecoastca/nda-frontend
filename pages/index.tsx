@@ -10,7 +10,7 @@ import { marked } from 'marked';
 
 const Home = ({ works, homepage }: { works: any; homepage: any }) => {
   const router = useRouter();
-  const markedHtml = marked.parse(homepage?.description);
+  const markedHtml = marked.parse(homepage?.attributes?.description);
   const handleOnScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
     const scrollPercent =
       e.currentTarget?.scrollLeft /
@@ -25,7 +25,9 @@ const Home = ({ works, homepage }: { works: any; homepage: any }) => {
   return (
     <Layout>
       <div className="flex flex-col px-4 justify-around w-screen gap-5 pt-4 md:pt-8 md:gap-10 lg:gap-0 lg:px-5 lg:border-r lg:border-[#FA6400] lg:w-[42vw]">
-        <p className="text-base md:text-xl xl:text-2xl">{homepage?.title}</p>
+        <p className="text-base md:text-xl xl:text-2xl">
+          {homepage?.attributes?.title}
+        </p>
         <div
           className="md:text-base"
           dangerouslySetInnerHTML={{
@@ -73,7 +75,7 @@ export const getStaticProps: GetStaticProps = async () => {
   return {
     props: {
       works: worksRes.data,
-      homepage: homepageRes.data.attributes,
+      homepage: homepageRes.data,
     },
     revalidate: 10,
   };
