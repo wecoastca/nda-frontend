@@ -67,7 +67,7 @@ const Home = ({ works, homepage }: { works: any; homepage: any }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps = async () => {
+export async function getStaticProps() {
   const [worksRes, homepageRes] = await Promise.all([
     fetchAPI('/works', { populate: '*' }),
     fetchAPI('/homepage', { populate: '*' }),
@@ -77,8 +77,8 @@ export const getStaticProps: GetStaticProps = async () => {
       works: worksRes.data,
       homepage: homepageRes.data,
     },
-    revalidate: 10,
+    revalidate: 5,
   };
-};
+}
 
 export default Home;
