@@ -55,7 +55,7 @@ const Works = ({ categories, works }) => {
             return (
               <div
                 key={work?.id}
-                className={`border-[#FA6400] hover:border-[#FD6703] hover:border-2 border-r px-8 py-12 flex flex-col gap-8 border-b work-block last:border-b-0 md:last:border-b lg:even:border-b-0 lg:hover:border-2`}
+                className={`border-[#FA6400] border-b border-r hover:border-[#FD6703] hover:border-2 hover:border-t-[1px]md:border-r  lg:even:border-b-0 lg:even:hover:border-b lg:even:hover:border-l lg:even:hover:border-t lg:odd:hover:border-l lg:odd:hover:border-t px-8 py-12 flex flex-col gap-8 work-block `}
               >
                 <div className="relative w-min flex gap-5">
                   {work?.attributes?.categories?.data?.map((c) => (
@@ -85,8 +85,10 @@ const Works = ({ categories, works }) => {
                 <Link
                   href={`/works/${encodeURIComponent(work?.attributes?.slug)}`}
                 >
-                  <a className="hover:opacity-20 text-lg">
-                    <p>{work?.attributes?.title}</p>
+                  <a>
+                    <p className="hover:opacity-20 text-lg">
+                      {work?.attributes?.title}
+                    </p>
                   </a>
                 </Link>
               </div>

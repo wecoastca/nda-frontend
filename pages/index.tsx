@@ -1,24 +1,28 @@
-/* eslint-disable @next/next/no-img-element */
 import { GetStaticProps } from 'next';
 import React, { WheelEvent } from 'react';
 import Layout from '../components/layout';
 import { fetchAPI } from '../lib/api';
-import { SampleCard } from '../components/card';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { marked } from 'marked';
+import NextImage from '../components/image';
 
 const Home = ({ works, homepage }: { works: any; homepage: any }) => {
   const router = useRouter();
   const markedHtml = marked.parse(homepage?.attributes?.description);
-  const handleOnScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
-    const scrollPercent =
-      e.currentTarget?.scrollLeft /
-      (e.currentTarget?.scrollWidth - e.currentTarget?.clientWidth);
+  const handleOnScroll = () => {
+    let timeoutId;
+    return (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+      clearTimeout(timeoutId);
 
-    if (scrollPercent === 1) {
-      setTimeout(() => router.push('/works'), 1000);
-    }
+      const scrollPercent =
+        e.currentTarget?.scrollLeft /
+        (e.currentTarget?.scrollWidth - e.currentTarget?.clientWidth);
+
+      if (Math.floor(scrollPercent) === 1) {
+        timeoutId = setTimeout(() => router.push('/works'), 3000);
+      }
+    };
   };
 
   // TODO: Левый и правый блок вынести в отдельные компоненты
@@ -37,48 +41,51 @@ const Home = ({ works, homepage }: { works: any; homepage: any }) => {
       </div>
 
       <div
-        className="mx-4 flex gap-10 items-center overflow-x-scroll overflow-y-hidden lg:overflow-hidden w-screen my-4 lg:w-[54vw] lg:px-10"
+        className="ml-4 pr-16 flex gap-10 items-center overflow-x-scroll overflow-y-hidden lg:overflow-hidden w-screen my-4 lg:w-[54vw] lg:pl-10 lg:pr-24"
         onWheel={(e: WheelEvent<HTMLDivElement>) => {
-          // TODO: Вынести в глобальные переменные
           if (window.innerWidth >= 1024) {
             e.currentTarget.scrollLeft += e.deltaY;
           }
         }}
-        onScroll={handleOnScroll}
+        onScroll={handleOnScroll()}
       >
-        {works?.map((x) => {
-          return (
+        {works
+          ?.filter((w) => w.attributes.isShowOnMain)
+          .map((x) => (
             <Link
               key={x?.attributes?.slug}
               href={`/works/${encodeURIComponent(x?.attributes?.slug)}`}
             >
               <a className="select-none">
-                <SampleCard
-                  item={x}
-                  blurValue={12}
-                  className="select-none relative shrink-0 w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] wrap"
-                />
+                <div className="select-none relative shrink-0 w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] wrap">
+                  <NextImage
+                    image={x.attributes.originalImage}
+                    alt={
+                      x.attributes.originalImage.data.attributes.alternativeText
+                    }
+                  />
+                </div>
               </a>
             </Link>
-          );
-        })}
+          ))}
       </div>
     </Layout>
   );
 };
 
-export async function getStaticProps() {
-  const [worksRes, homepageRes] = await Promise.all([
-    fetchAPI('/works', { populate: '*' }),
+export const getStaticProps: GetStaticProps = async () => {
+  const [{ data: homepage }, { data: works }] = await Promise.all([
     fetchAPI('/homepage', { populate: '*' }),
+    fetchAPI('/works', { populate: '*' }),
   ]);
+
   return {
     props: {
-      works: worksRes.data,
-      homepage: homepageRes.data,
+      homepage,
+      works,
     },
-    revalidate: 5,
+    revalidate: 10,
   };
-}
+};
 
 export default Home;

@@ -2,70 +2,14 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import Layout from '../../components/layout';
 import { fetchAPI } from '../../lib/api';
 import { useRouter } from 'next/router';
-import React, {
-  ButtonHTMLAttributes,
-  FC,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SampleCard } from '../../components/card';
 import { debounce } from 'lodash';
 import { marked } from 'marked';
 import NextImage from 'next/image';
 import { getStrapiMedia } from '../../lib/media';
-
-const NavButton: FC<ButtonHTMLAttributes<any>> = ({
-  onClick,
-  children,
-  ...otherProps
-}) => {
-  return (
-    <button onClick={onClick && onClick} {...otherProps}>
-      <svg
-        width="24"
-        height="21"
-        viewBox="0 0 24 21"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {children}
-      </svg>
-    </button>
-  );
-};
-
-type WorkModalPropsType = {
-  isVisible: boolean;
-  onBackButtonClick?: () => void;
-  ImageComponent?: React.ElementType;
-};
-const WorkModal: FC<WorkModalPropsType> = ({
-  isVisible,
-  onBackButtonClick,
-  ImageComponent,
-}) => {
-  if (!isVisible) {
-    return null;
-  }
-
-  return (
-    <div className="w-full h-full fixed z-10 bg-white top-0 flex flex-col lg:hidden lg:-z-10">
-      <div className="border-b border-[#FA6400] h-12 px-4 md:px-5 md:h-16 flex">
-        <NavButton onClick={onBackButtonClick && onBackButtonClick}>
-          <path
-            d="M10.3409 21L12.0909 19.25L4.88636 12.0682H23.5455V9.56818H4.88636L12.0909 2.36364L10.3409 0.636364L0.159091 10.8182L10.3409 21Z"
-            fill="black"
-          />
-        </NavButton>
-      </div>
-      <div className="flex justify-center items-center h-full">
-        <ImageComponent />
-      </div>
-    </div>
-  );
-};
+import { NavButton } from '../../components/navButton';
+import { Modal } from '../../components/modal';
 
 const Work = ({ works }) => {
   const router = useRouter();
@@ -74,6 +18,7 @@ const Work = ({ works }) => {
   );
   const { description, id, ...currentDescription } =
     currentWork?.attributes?.workDescription;
+  const { slug } = currentWork?.attributes;
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [blur, setBlur] = useState({ default: 10, current: 10 });
   const [isCompact, setIsCompact] = useState(false);
@@ -95,19 +40,24 @@ const Work = ({ works }) => {
     }
   }, [router?.query?.slug, scrollableRef]);
 
+  const currIndex = works.findIndex((w) => w.attributes.slug === slug);
+
   const handleClickNextWork = () => {
-    const nextIndex = Number(router?.query?.slug) + 1;
-    works?.find((y) => y?.id == nextIndex)
-      ? router?.push(`${nextIndex}`)
-      : router?.push(`1`);
+    const nextWorkSlug =
+      currIndex + 1 === works.length
+        ? works[0].attributes.slug
+        : works[currIndex + 1].attributes.slug;
+
+    router?.push(`${nextWorkSlug}`);
     setBlur((blur) => ({ ...blur, current: 10 }));
   };
 
   const handleClickPreviousWork = () => {
-    const prevIndex = Number(router?.query?.slug) - 1;
-    works?.find((y) => y?.id == prevIndex)
-      ? router?.push(`${prevIndex}`)
-      : router?.push(`${works?.length}`);
+    const prevWorkSlug =
+      currIndex === 0
+        ? works[works.length - 1].attributes.slug
+        : works[currIndex - 1].attributes.slug;
+    router?.push(`${prevWorkSlug}`);
     setBlur((blur) => ({ ...blur, current: 10 }));
   };
 
@@ -155,13 +105,9 @@ const Work = ({ works }) => {
         children: (
           <NavButton
             onClick={handleClickPreviousWork}
-            className="hidden mx-auto lg:block hover:opacity-60 "
-          >
-            <path
-              d="M10.3409 21L12.0909 19.25L4.88636 12.0682H23.5455V9.56818H4.88636L12.0909 2.36364L10.3409 0.636364L0.159091 10.8182L10.3409 21Z"
-              fill="black"
-            />
-          </NavButton>
+            direction="left"
+            className="hidden mx-auto lg:block hover:opacity-60"
+          />
         ),
       }}
       layoutContainerProps={{
@@ -181,26 +127,28 @@ const Work = ({ works }) => {
       <div className="flex justify-between w-screen sticky border-b border-[#FA6400] h-12 px-4 md:px-5 md:h-16 lg:hidden">
         <NavButton
           onClick={handleClickPreviousWork}
+          direction="left"
           className="active:opacity-60"
-        >
-          <path
-            d="M10.3409 21L12.0909 19.25L4.88636 12.0682H23.5455V9.56818H4.88636L12.0909 2.36364L10.3409 0.636364L0.159091 10.8182L10.3409 21Z"
-            fill="black"
-          />
-        </NavButton>
-        <NavButton onClick={handleClickNextWork} className="active:opacity-60">
-          <path
-            d="M13.2045 21L23.3864 10.8182L13.2045 0.636364L11.4545 2.38636L18.6591 9.56818H0V12.0682H18.6591L11.4545 19.2727L13.2045 21Z"
-            fill="black"
-          />
-        </NavButton>
+        />
+        <NavButton
+          onClick={handleClickNextWork}
+          direction="right"
+          className="active:opacity-60"
+        />
       </div>
       <div
         onScroll={handleOnScroll}
         ref={scrollableRef}
-        className="w-screen h-full px-4 pt-6 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-[#FA6400] lg:w-[42vw] 2xl:px-8 2xl:pt-28"
+        className="w-screen h-full px-4 pt-6 pb-4 overflow-scroll flex flex-col gap-8 lg:px-6 lg:border-r lg:border-[#FA6400] lg:w-[42vw] 2xl:px-8 2xl:pt-12"
       >
-        <div className="relative w-min flex gap-5">
+        <div
+          className="relative w-min flex gap-5"
+          style={
+            currentWork?.attributes.categories.data.length === 0
+              ? { display: 'none' }
+              : {}
+          }
+        >
           {currentWork?.attributes.categories.data.map((c) => (
             <div key={c?.id}>
               <div
@@ -283,27 +231,22 @@ const Work = ({ works }) => {
       <div className="absolute top-[44%] right-[-46px] border-2 hover:border-4 rounded-full hover:opacity-60 border-[#F9B78B] hover:border-[rgb(249,183,139,0.6)] hidden lg:block">
         <NavButton
           onClick={handleClickNextWork}
+          direction="right"
           className="m-10 relative right-5"
-        >
-          <path
-            d="M13.2045 21L23.3864 10.8182L13.2045 0.636364L11.4545 2.38636L18.6591 9.56818H0V12.0682H18.6591L11.4545 19.2727L13.2045 21Z"
-            fill="black"
-          />
-        </NavButton>
+        />
       </div>
-      <WorkModal
+      <Modal
         isVisible={isModalVisible}
         onBackButtonClick={() => setIsModalVisible(!isModalVisible)}
-        ImageComponent={() => (
-          <div className="relative w-[90%] h-[48%] md:h-[77%]">
-            <SampleCard
-              item={currentWork}
-              className="relative shrink-0 h-full w-full wrap"
-              blurValue={blur?.current}
-            />
-          </div>
-        )}
-      />
+      >
+        <div className="relative w-[90%] h-[48%] md:h-[77%]">
+          <SampleCard
+            item={currentWork}
+            className="relative shrink-0 h-full w-full wrap"
+            blurValue={blur?.current}
+          />
+        </div>
+      </Modal>
     </Layout>
   );
 };

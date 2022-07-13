@@ -64,7 +64,7 @@ const Layout = ({
           className="hidden w-16 xl:w-20 border-r border-[#FA6400] lg:flex shrink-0"
           {...sidebarProps}
         ></div>
-        <div className="flex flex-col lg:my-0 lg:flex-row lg:justify-start">
+        <div className="flex flex-col flex-1 lg:my-0 lg:flex-row lg:justify-start">
           {children}
         </div>
       </div>

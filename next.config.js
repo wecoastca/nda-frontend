@@ -11,6 +11,14 @@ const nextConfig = {
     ],
     layoutRaw: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/mailchimp/:path*',
+        destination: 'https://us7.api.mailchimp.com/3.0/:path*',
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

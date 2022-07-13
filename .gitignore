@@ -122,3 +122,4 @@ build
 # Optional REPL history
 ############################
 .next/*
+.env.local

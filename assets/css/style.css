@@ -28,6 +28,10 @@ a:active {
   color: inherit;
 }
 
+input {
+  outline: none;
+}
+
 #title {
   letter-spacing: 0.4px;
   font-size: 22px;
@@ -70,4 +74,21 @@ img:hover {
 
 .work-block:hover #blurCircle {
   filter: blur(24px);
+}
+
+.empty-text-block::after,
+.empty-text-block::before {
+  position: absolute;
+  content: '';
+  width: 100%;
+  height: 1px;
+  background-color: #FA6400;
+}
+
+.empty-text-block::after {
+  transform: rotate(-45deg);
+}
+
+.empty-text-block::before {
+  transform: rotate(45deg);
 }
