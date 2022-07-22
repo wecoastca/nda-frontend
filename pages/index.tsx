@@ -76,7 +76,14 @@ const Home = ({ works, homepage }: { works: any; homepage: any }) => {
 export const getStaticProps: GetStaticProps = async () => {
   const [{ data: homepage }, { data: works }] = await Promise.all([
     fetchAPI('/homepage', { populate: '*' }),
-    fetchAPI('/works', { populate: '*' }),
+    fetchAPI('/works', {
+      populate: '*',
+      filters: {
+        isShowOnMain: {
+          $eq: 'true',
+        },
+      },
+    }),
   ]);
 
   return {

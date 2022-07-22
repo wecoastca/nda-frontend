@@ -32,9 +32,9 @@ const Works = ({ categories, works }) => {
               <button
                 value={item?.attributes.name}
                 onClick={(e) => setWorkCategory(e?.currentTarget?.value)}
-                className={`hover:opacity-20 visited:line-through ${
+                className={`hover:opacity-20 visited:line-through w-max ${
                   workCategory === item.attributes?.name ? 'line-through' : null
-                }`}
+                } `}
               >
                 {item?.attributes?.name}
               </button>
@@ -59,7 +59,7 @@ const Works = ({ categories, works }) => {
               >
                 <div className="relative w-min flex gap-5">
                   {work?.attributes?.categories?.data?.map((c) => (
-                    <div key={c?.id}>
+                    <div key={c?.id} className="w-max">
                       <div
                         className={`blur-md h-8 absolute -z-10`}
                         id="blurCircle"

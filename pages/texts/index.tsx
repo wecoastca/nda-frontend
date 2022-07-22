@@ -236,13 +236,12 @@ const Texts = ({ categories, texts, subscription }) => {
       <div className="shrink-0 flex flex-col justify-between  border-[#FA6400] border-b lg:border-b-0 lg:border-r lg:w-[42vw] lg:py-28">
         <ul className="flex text-sm gap-9 w-screen overflow-scroll px-4 md:text-xl md:gap-16 lg:gap-5 lg:w-auto lg:flex-col xl:text-2xl xl:px-6">
           {isMobile && (
-            <li className="relative">
+            <li className="relative h-fit">
               <div
-                className={`blur-md h-8 absolute top-2 -left-1 -z-10`}
+                className={`blur-md absolute top-2 -left-1 -z-10 w-full h-3/4`}
                 id="blurCircle"
                 style={{
                   background: `${subscription?.attributes?.buttonColor}`,
-                  width: subscription?.attributes?.buttonText?.length * 12,
                 }}
               ></div>
               <button
@@ -269,7 +268,7 @@ const Texts = ({ categories, texts, subscription }) => {
               <button
                 value={item?.attributes.name}
                 onClick={(e) => setCategory(e?.currentTarget?.value)}
-                className={`hover:opacity-20 visited:line-through ${
+                className={`hover:opacity-20 visited:line-through w-max ${
                   category === item.attributes?.name ? 'line-through' : null
                 }`}
               >
