@@ -5,9 +5,8 @@ export type ImageProps = Partial<NextImageProps> & {
   image?: any;
 };
 
-const Image = ({ image, ...otherProps }: ImageProps) => {
+export const Image = ({ image, ...otherProps }: ImageProps) => {
   const { alternativeText } = image.data.attributes;
-
   return (
     //@ts-ignore
     <NextImage
@@ -19,5 +18,3 @@ const Image = ({ image, ...otherProps }: ImageProps) => {
     />
   );
 };
-
-export default Image;

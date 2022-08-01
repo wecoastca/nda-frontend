@@ -1,11 +1,10 @@
 import { GetStaticProps } from 'next';
 import React, { WheelEvent } from 'react';
-import Layout from '../components/layout';
+import { Layout, Image } from '../components';
 import { fetchAPI } from '../lib/api';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { marked } from 'marked';
-import NextImage from '../components/image';
 
 const Home = ({ works, homepage }: { works: any; homepage: any }) => {
   const router = useRouter();
@@ -58,7 +57,7 @@ const Home = ({ works, homepage }: { works: any; homepage: any }) => {
             >
               <a className="select-none">
                 <div className="select-none relative shrink-0 w-[252px] h-[533px] md:w-[403px] md:h-[533px] xl:w-[520px] xl:h-[632px] wrap">
-                  <NextImage
+                  <Image
                     image={x.attributes.originalImage}
                     alt={
                       x.attributes.originalImage.data.attributes.alternativeText

@@ -1,6 +1,6 @@
 import { NavButton } from './navButton';
 
-type ModalPropsType = {
+export type ModalPropsType = {
   isVisible: boolean;
   onBackButtonClick?: () => void;
   Header?: React.ElementType;
@@ -26,7 +26,7 @@ export const Modal = ({
           onClick={onBackButtonClick && onBackButtonClick}
           direction="left"
         />
-        <Header />
+        {Header ? <Header /> : <></>}
       </div>
       <div className="flex justify-center items-center h-full">{children}</div>
     </div>

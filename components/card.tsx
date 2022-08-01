@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import NextImage from './image';
+import { Image } from './image';
 import { getStrapiMedia } from '../lib/media';
 
 type SampleCardPropsType = {
@@ -57,7 +57,7 @@ export const SampleCard = ({
         }}
         ref={imageContainerRef}
       >
-        <NextImage
+        <Image
           image={originalImage}
           alt={originalImage.data.attributes.alternativeText}
         />

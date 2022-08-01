@@ -1,28 +1,52 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
-import Layout from '../../components/layout';
+import { Modal, SampleCard, SwitchingLayout } from '../../components';
 import { fetchAPI } from '../../lib/api';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { SampleCard } from '../../components/card';
 import { debounce } from 'lodash';
 import { marked } from 'marked';
 import NextImage from 'next/image';
 import { getStrapiMedia } from '../../lib/media';
-import { NavButton } from '../../components/navButton';
-import { Modal } from '../../components/modal';
 
-const Work = ({ works }) => {
+type Work = {
+  id: number;
+  attributes: {
+    title: string;
+    isNDA: boolean;
+    slug: string;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+    isShowOnMain: boolean;
+    originalImage: Record<string, any>;
+    fakeImage: Record<string, any>;
+    categories: Record<string, any>;
+    workDescription: {
+      id: number;
+      period: string;
+      duration: string;
+      projectPosition: string;
+      tools: string;
+      description: string;
+      customer: Record<string, any>;
+    };
+  };
+};
+
+const Work = ({ work, slugs }: { work: Work; slugs: string[] }) => {
   const router = useRouter();
-  const currentWork = works?.find(
-    (x) => x?.attributes?.slug == router?.query?.slug
-  );
-  const { description, id, ...currentDescription } =
-    currentWork?.attributes?.workDescription;
-  const { slug } = currentWork?.attributes;
+
+  const { slug, title, categories, workDescription } = work?.attributes;
+  const { description: descriptionText, id, ...description } = workDescription;
+
+  const currSlugI = slugs.indexOf(slug);
+  const nextSlug = slugs[(currSlugI + 1) % slugs.length];
+  const prevSlug = slugs[currSlugI - 1 < 0 ? slugs.length - 1 : currSlugI - 1];
+
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [blur, setBlur] = useState({ default: 10, current: 10 });
   const [isCompact, setIsCompact] = useState(false);
-  const markedHtml = marked.parse(description);
+  const markedHtml = marked.parse(descriptionText);
   const scrollableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,24 +64,13 @@ const Work = ({ works }) => {
     }
   }, [router?.query?.slug, scrollableRef]);
 
-  const currIndex = works.findIndex((w) => w.attributes.slug === slug);
-
   const handleClickNextWork = () => {
-    const nextWorkSlug =
-      currIndex + 1 === works.length
-        ? works[0].attributes.slug
-        : works[currIndex + 1].attributes.slug;
-
-    router?.push(`${nextWorkSlug}`);
+    router?.push(`${nextSlug}`);
     setBlur((blur) => ({ ...blur, current: 10 }));
   };
 
   const handleClickPreviousWork = () => {
-    const prevWorkSlug =
-      currIndex === 0
-        ? works[works.length - 1].attributes.slug
-        : works[currIndex - 1].attributes.slug;
-    router?.push(`${prevWorkSlug}`);
+    router?.push(`${prevSlug}`);
     setBlur((blur) => ({ ...blur, current: 10 }));
   };
 
@@ -100,100 +113,69 @@ const Work = ({ works }) => {
   );
 
   return (
-    <Layout
-      sidebarProps={{
-        children: (
-          <NavButton
-            onClick={handleClickPreviousWork}
-            direction="left"
-            className="hidden mx-auto lg:block hover:opacity-60"
-          />
-        ),
-      }}
+    <SwitchingLayout
+      onNext={handleClickNextWork}
+      onPrevious={handleClickPreviousWork}
       layoutContainerProps={{
-        onKeyDown: (e) => {
-          if (e?.key === 'ArrowLeft') {
-            handleClickPreviousWork();
-          }
-          if (e?.key === 'ArrowRight') {
-            handleClickNextWork();
-          }
-        },
         onWheel: handleOnWheel,
         tabIndex: -1,
       }}
     >
-      {/* Nav mobile */}
-      <div className="flex justify-between w-screen sticky border-b border-[#FA6400] h-12 px-4 md:px-5 md:h-16 lg:hidden">
-        <NavButton
-          onClick={handleClickPreviousWork}
-          direction="left"
-          className="active:opacity-60"
-        />
-        <NavButton
-          onClick={handleClickNextWork}
-          direction="right"
-          className="active:opacity-60"
-        />
-      </div>
+      {/* Main text content */}
       <div
         onScroll={handleOnScroll}
         ref={scrollableRef}
         className="w-screen h-full px-4 pt-6 pb-4 overflow-scroll flex flex-col gap-8 lg:px-6 lg:border-r lg:border-[#FA6400] lg:w-[42vw] 2xl:px-8 2xl:pt-12"
       >
         <div
-          className="relative w-min flex gap-5"
-          style={
-            currentWork?.attributes.categories.data.length === 0
-              ? { display: 'none' }
-              : {}
-          }
+          className="relative flex-wrap whitespace-nowrap flex gap-5"
+          style={categories.data.length === 0 ? { display: 'none' } : {}}
         >
-          {currentWork?.attributes.categories.data.map((c) => (
-            <div key={c?.id}>
-              <div
-                className={`blur-md h-8 absolute -z-10`}
-                style={{
-                  background: c?.attributes?.color,
-                  width: c?.attributes?.name.length * 12,
-                }}
-              ></div>
-              <button
-                className={`inline-block hover:opacity-20`}
-                value={c?.attributes?.name}
-                onClick={(e) => {
-                  router.push(`/works?c=${e.currentTarget?.value}`);
-                }}
-              >
-                <span className="text-base z-10">{c?.attributes?.name}</span>
-              </button>
-            </div>
-          ))}
+          {categories.data.map((c) => {
+            const { color, name } = c.attributes;
+            return (
+              <div key={c?.id}>
+                <div
+                  className={`blur-md h-8 absolute -z-10`}
+                  style={{
+                    background: color,
+                    width: name.length * 12,
+                  }}
+                ></div>
+                <button
+                  className={`inline-block hover:opacity-20`}
+                  value={name}
+                  onClick={(e) => {
+                    router.push(`/works?c=${e.currentTarget?.value}`);
+                  }}
+                >
+                  <span className="text-base z-10">{name}</span>
+                </button>
+              </div>
+            );
+          })}
         </div>
 
-        <p className="text-lg md:text-2xl lg:text-xl xl:text-2xl">
-          {currentWork?.attributes?.title}
-        </p>
+        <p className="text-lg md:text-2xl lg:text-xl xl:text-2xl">{title}</p>
         <div className="grid grid-cols-2 gap-x-10 gap-y-12 md:gap-x-28 lg:gap-x-16 xl:gap-x-32">
-          {Object.entries(currentDescription).map(([clearKey, value]) => {
+          {Object.entries(description).map(([clearKey, tableValue]) => {
             const key = clearKey.replace(
               /[A-Z]/g,
               (match) => ` ${match.toLowerCase()}`
             );
-            if (typeof value === 'object') {
+            if (typeof tableValue === 'object') {
+              const { width, height, alternativeText } =
+                tableValue?.data?.attributes;
               return (
                 <React.Fragment key={key}>
                   <div className="text-base self-center">{key}</div>
                   <div className="w-16 md:w-20">
                     <NextImage
                       layout="responsive"
-                      // @ts-ignore
-                      width={value.data.attributes.width}
-                      // @ts-ignore
-                      height={value.data.attributes.height}
-                      src={getStrapiMedia(value)}
-                      // @ts-ignore
-                      alt={value.data.attributes.alternativeText}
+                      width={width}
+                      height={height}
+                      src={getStrapiMedia(tableValue)}
+                      alt={alternativeText}
                     />
                   </div>
                 </React.Fragment>
@@ -202,7 +184,9 @@ const Work = ({ works }) => {
             return (
               <React.Fragment key={key}>
                 <div className="text-base self-center">{key}</div>
-                <div className="text-xs md:text-lg self-center">{value}</div>
+                <div className="text-xs md:text-lg self-center">
+                  {tableValue}
+                </div>
               </React.Fragment>
             );
           })}
@@ -214,60 +198,57 @@ const Work = ({ works }) => {
           }}
         />
       </div>
-
+      {/* Image content */}
       <div className="lg:h-full lg:w-[54vw] lg:flex lg:items-center lg:justify-center">
         <button
           onClick={handleCardClick}
           className="w-[139px] h-[184px] absolute right-4 bottom-14 md:w-[233px] md:h-[309px] md:right-11 md:bottom-24 lg:relative lg:right-auto lg:bottom-auto lg:w-[75%] lg:h-[78%] lg:cursor-default"
         >
           <SampleCard
-            item={currentWork}
+            item={work}
             blurValue={blur?.current}
             className="relative shrink-0 h-full w-full wrap"
             isCompact={isCompact}
           />
         </button>
       </div>
-      <div className="absolute top-[44%] right-[-46px] border-2 hover:border-4 rounded-full hover:opacity-60 border-[#F9B78B] hover:border-[rgb(249,183,139,0.6)] hidden lg:block">
-        <NavButton
-          onClick={handleClickNextWork}
-          direction="right"
-          className="m-10 relative right-5"
-        />
-      </div>
+      {/* Modal */}
       <Modal
         isVisible={isModalVisible}
         onBackButtonClick={() => setIsModalVisible(!isModalVisible)}
       >
         <div className="relative w-[90%] h-[48%] md:h-[77%]">
           <SampleCard
-            item={currentWork}
+            item={work}
             className="relative shrink-0 h-full w-full wrap"
             blurValue={blur?.current}
           />
         </div>
       </Modal>
-    </Layout>
+    </SwitchingLayout>
   );
 };
 
-export const getStaticProps: GetStaticProps = async () => {
-  // Run API calls in parallel
-  const [categoriesRes, worksRes] = await Promise.all([
-    fetchAPI('/categories', { populate: '*' }),
-    fetchAPI('/works', {
-      populate: [
-        'originalImage',
-        'workDescription.customer',
-        'fakeImage',
-        'categories',
-      ],
-    }),
-  ]);
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const { slug } = params;
+  const { data: works } = await fetchAPI(`/works`, {
+    populate: {
+      originalImage: '*',
+      fakeImage: '*',
+      categories: '*',
+      workDescription: {
+        populate: '*',
+      },
+    },
+  });
+
+  const work = works.find((w) => w?.attributes?.slug === slug);
+  const slugs = works.map((w) => w?.attributes?.slug).sort((a, b) => a - b);
+
   return {
     props: {
-      categories: categoriesRes.data,
-      works: worksRes.data,
+      work,
+      slugs,
     },
     revalidate: 10,
   };

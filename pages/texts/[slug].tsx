@@ -1,91 +1,65 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
-import Layout from '../../components/layout';
+import { SwitchingLayout, Image } from '../../components';
 import { fetchAPI } from '../../lib/api';
 import { useRouter } from 'next/router';
-import NextImage from '../../components/image';
 import React from 'react';
 import { marked } from 'marked';
-import { NavButton } from '../../components/navButton';
 
-const Text = ({ texts }) => {
+const Text = ({ text, slugs }) => {
   const router = useRouter();
-  const currentText = texts?.find(
-    (x) => x?.attributes?.slug == router?.query?.slug
-  );
-  const { title, image, content, categories, slug } = currentText?.attributes;
-  const currIndex = texts.findIndex((w) => w.attributes.slug === slug);
+
+  const { title, image, content, categories, slug } = text.attributes;
+
+  const currSlugI = slugs.indexOf(slug);
+  const nextSlug = slugs[(currSlugI + 1) % slugs.length];
+  const prevSlug = slugs[currSlugI - 1 < 0 ? slugs.length - 1 : currSlugI - 1];
 
   const markedHtml = marked.parse(content || '');
 
-  const handleClickNextWork = () => {
-    const nextTextSlug =
-      currIndex + 1 === texts.length
-        ? texts[0].attributes.slug
-        : texts[currIndex + 1].attributes.slug;
-
-    router?.push(`${nextTextSlug}`);
+  const handleClickNextText = () => {
+    router?.push(`${nextSlug}`);
   };
 
-  const handleClickPreviousWork = () => {
-    const prevTextSlug =
-      currIndex === 0
-        ? texts[texts.length - 1].attributes.slug
-        : texts[currIndex - 1].attributes.slug;
-    router?.push(`${prevTextSlug}`);
+  const handleClickPreviousText = () => {
+    router?.push(`${prevSlug}`);
   };
 
   return (
-    <Layout
-      sidebarProps={{
-        children: (
-          <NavButton
-            onClick={handleClickPreviousWork}
-            direction="left"
-            className="hidden mx-auto lg:block hover:opacity-60"
-          />
-        ),
-      }}
+    <SwitchingLayout
+      onNext={handleClickNextText}
+      onPrevious={handleClickPreviousText}
       layoutContainerProps={{
-        onKeyDown: (e) => {
-          if (e?.key === 'ArrowLeft') {
-            handleClickPreviousWork();
-          }
-          if (e?.key === 'ArrowRight') {
-            handleClickNextWork();
-          }
-        },
         tabIndex: -1,
       }}
     >
-      {/* Nav mobile */}
-      <div className="flex justify-between w-screen sticky border-b border-[#FA6400] h-12 px-4 md:px-5 md:h-16 lg:hidden">
-        <NavButton
-          onClick={handleClickPreviousWork}
-          direction="left"
-          className="active:opacity-60"
-        />
-        <NavButton
-          onClick={handleClickNextWork}
-          direction="right"
-          className="active:opacity-60"
-        />
-      </div>
-      <div className="w-screen h-full px-4 pt-6 pb-4 overflow-scroll flex flex-col gap-8 md:pt-12 lg:pt-20 lg:px-6 lg:border-r lg:border-[#FA6400] lg:w-[42vw] 2xl:px-8 2xl:pt-28">
-        <div className="relative w-min flex gap-5">
-          {categories?.data.map((c) => (
-            <div key={c?.id}>
-              <div
-                className={`blur-md h-8 absolute -z-10`}
-                style={{
-                  background: c?.attributes?.color,
-                  width: c?.attributes?.name.length * 12,
-                }}
-              ></div>
-              <div className={`inline-block`}>
-                <span className="text-base z-10">{c?.attributes?.name}</span>
+      <div className="w-screen h-full px-4 pt-6 pb-4 overflow-scroll flex flex-col gap-8 lg:px-6 lg:border-r lg:border-[#FA6400] lg:w-[42vw] 2xl:px-8 2xl:pt-12">
+        <div
+          className="relative flex-wrap whitespace-nowrap flex gap-5"
+          style={categories.data.length === 0 ? { display: 'none' } : {}}
+        >
+          {categories?.data.map((c) => {
+            const { color, name } = c.attributes;
+            return (
+              <div key={c?.id}>
+                <div
+                  className={`blur-md h-8 absolute -z-10`}
+                  style={{
+                    background: color,
+                    width: name.length * 12,
+                  }}
+                ></div>
+                <button
+                  className={`inline-block hover:opacity-20`}
+                  value={name}
+                  onClick={(e) => {
+                    router.push(`/texts?c=${e.currentTarget?.value}`);
+                  }}
+                >
+                  <span className="text-base z-10">{name}</span>
+                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <p className="text-lg md:text-2xl lg:text-xl xl:text-2xl">{title}</p>
@@ -98,28 +72,25 @@ const Text = ({ texts }) => {
       </div>
 
       <div className="lg:h-full lg:w-[54vw] lg:flex lg:items-center lg:justify-center">
-        <NextImage image={image} alt={image?.data.attributes.alternativeText} />
+        <div className="hidden lg:block lg:relative lg:right-auto lg:bottom-auto lg:w-[75%] lg:h-[78%] lg:cursor-default">
+          <Image image={image} alt={image?.data.attributes.alternativeText} />
+        </div>
       </div>
-      <div className="absolute top-[44%] right-[-46px] border-2 hover:border-4 rounded-full hover:opacity-60 border-[#F9B78B] hover:border-[rgb(249,183,139,0.6)] hidden lg:block">
-        <NavButton
-          onClick={handleClickNextWork}
-          direction="right"
-          className="m-10 relative right-5"
-        />
-      </div>
-    </Layout>
+    </SwitchingLayout>
   );
 };
 
-export const getStaticProps: GetStaticProps = async () => {
-  const [{ data: categories }, { data: texts }] = await Promise.all([
-    fetchAPI('/text-categories', { populate: '*' }),
-    fetchAPI('/texts', { populate: '*' }),
-  ]);
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const { slug } = params;
+  const { data: texts } = await fetchAPI('/texts', { populate: '*' });
+
+  const text = texts.find((w) => w?.attributes?.slug === slug);
+  const slugs = texts.map((w) => w?.attributes?.slug).sort((a, b) => a - b);
+
   return {
     props: {
-      categories: categories,
-      texts: texts,
+      text,
+      slugs,
     },
     revalidate: 10,
   };

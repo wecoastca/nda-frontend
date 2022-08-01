@@ -1,5 +1,5 @@
 import { GetStaticProps } from 'next';
-import Layout from '../../components/layout';
+import { Layout } from '../../components';
 import { fetchAPI } from '../../lib/api';
 import Link from 'next/link';
 import React, { useState } from 'react';
@@ -57,9 +57,9 @@ const Works = ({ categories, works }) => {
                 key={work?.id}
                 className={`border-[#FA6400] border-b border-r hover:border-[#FD6703] hover:border-2 hover:border-t-[1px]md:border-r  lg:even:border-b-0 lg:even:hover:border-b lg:even:hover:border-l lg:even:hover:border-t lg:odd:hover:border-l lg:odd:hover:border-t px-8 py-12 flex flex-col gap-8 work-block `}
               >
-                <div className="relative w-min flex gap-5">
+                <div className="relative flex gap-5 flex-wrap whitespace-nowrap">
                   {work?.attributes?.categories?.data?.map((c) => (
-                    <div key={c?.id} className="w-max">
+                    <div key={c?.id}>
                       <div
                         className={`blur-md h-8 absolute -z-10`}
                         id="blurCircle"

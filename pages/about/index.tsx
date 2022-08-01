@@ -1,6 +1,6 @@
 import { GetStaticProps } from 'next';
 import React from 'react';
-import Layout from '../../components/layout';
+import { Layout } from '../../components';
 import { fetchAPI } from '../../lib/api';
 
 const About = ({ about }) => {
